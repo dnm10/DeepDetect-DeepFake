@@ -1,11 +1,10 @@
 # Core ML / DL frameworks
-#tensorflow
-tensorflow==2.16.1
+tensorflow==2.20.0
 
-#PyTorch 
-torch==2.4.1
-torchvision==0.19.1
-torchaudio==2.4.1
+# PyTorch (compatible with Python 3.13)
+torch==2.8.0
+torchvision==0.23.0
+torchaudio==2.8.0
 
 # Face detection
 mtcnn==0.1.1
