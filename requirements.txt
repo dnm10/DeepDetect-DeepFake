@@ -1,0 +1,31 @@
+# Core ML / DL frameworks
+#tensorflow
+tensorflow==2.16.1
+
+#PyTorch 
+torch==2.4.1
+torchvision==0.19.1
+torchaudio==2.4.1
+
+# Face detection
+mtcnn==0.1.1
+
+# Image / video processing
+opencv-python==4.8.0.76
+Pillow==10.4.0
+
+# Data science essentials
+numpy==1.26.4
+pandas==2.2.2
+scikit-learn==1.5.2
+matplotlib==3.9.2
+seaborn==0.13.2
+
+# Web app
+streamlit==1.38.0
+
+# Explainability / Visualization (for Grad-CAM etc.)
+tf-keras-vis==0.8.6
+
+# Jupyter environment
+jupyterlab==4.2.5
