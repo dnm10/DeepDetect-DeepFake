@@ -1,6 +1,6 @@
 import React from "react";
-import Navbar from "../Components/Navbar";
-import Sidebar from "../Components/Sidebar";
+import Navbar from "../Components/Navbar.js";
+import Sidebar from "../Components/Sidebar.js";
 import "./Dashboard.css";  
 
 function Dashboard() {

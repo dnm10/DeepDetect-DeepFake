@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import Navbar from "../Components/Navbar";
-import Sidebar from "../Components/Sidebar";
+import Navbar from "../Components/Navbar.js";
+import Sidebar from "../Components/Sidebar.js";
 import './Upload.css';
 
 function Upload() {

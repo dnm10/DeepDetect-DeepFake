@@ -1,0 +1,45 @@
+/* Sidebar container */
+.sidebar {
+  width: 220px;
+  height: 100vh; /* full height */
+  background-color: #1e1e2f; /* dark sidebar color */
+  color: #fff;
+  padding: 20px 0;
+  position: fixed; /* fixed on the left */
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+  font-family: Arial, sans-serif;
+}
+
+/* Sidebar list */
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Sidebar list items */
+.sidebar ul li {
+  padding: 15px 25px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Sidebar links */
+.sidebar ul li a {
+  color: #fff;
+  text-decoration: none;
+  display: block;
+}
+
+/* Hover effect */
+.sidebar ul li:hover {
+  background-color: #4b4b7d; /* slightly lighter color */
+  cursor: pointer;
+}
+
+.sidebar ul li a:hover {
+  color: #ffcc00; /* highlight link on hover */
+}
