@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import Navbar from "../Components/Navbar.js";
-import Sidebar from "../Components/Sidebar.js";
 import './Upload.css';
 
 function Upload() {
@@ -9,26 +8,44 @@ function Upload() {
 
   const handleUpload = (e) => {
     setFile(e.target.files[0]);
+    setResult(null); // reset result on new upload
   };
 
   const runDetection = () => {
     // Fake detection logic
-    setResult("This file is likely FAKE (85%)");
+    setTimeout(() => {
+      setResult("⚠️ This file is likely FAKE (85%)");
+    }, 1000); // simulate loading
   };
 
   return (
     <div className="dashboard">
       <Navbar />
       <div className="dashboard-body">
-        <Sidebar />
-        <div className="main-content">
-          <h2>Upload & Detect</h2>
-          <input type="file" onChange={handleUpload} />
-          <button onClick={runDetection}>Run Detection</button>
+        <div className="upload-container">
+          <h2 className="title">Upload & Detect</h2>
 
-          {file && <p>Uploaded File: {file.name}</p>}
+          <div className="upload-card">
+            <input type="file" id="file-upload" onChange={handleUpload} hidden />
+            <label htmlFor="file-upload" className="upload-box">
+              {file ? (
+                <span>{file.name}</span>
+              ) : (
+                <span>📂 Click to choose a file</span>
+              )}
+            </label>
+
+            <button 
+              className="detect-btn" 
+              onClick={runDetection}
+              disabled={!file}
+            >
+              Run Detection
+            </button>
+          </div>
+
           {result && (
-            <div className="results">
+            <div className="results fade-in">
               <h3>Results:</h3>
               <p>{result}</p>
             </div>

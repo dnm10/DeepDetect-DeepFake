@@ -1,24 +1,163 @@
+/* Dashboard.css */
 .dashboard {
-  margin-left: 230px;
-  padding: 20px;
-  background: #f4f6f9;
+  background: linear-gradient(180deg, #ffffff, #f0f4f8); /* white to light bluish */
   min-height: 100vh;
+  color: #0a192f;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  overflow-x: hidden;
 }
 
 .dashboard-body {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem;
 }
 
 .main-content {
-  background: white;
-  border-radius: 12px;
-  padding: 25px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  background: #ffffff;
+  padding: 2.5rem;
+  border-radius: 18px;
+  box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  max-width: 1000px;
+  width: 100%;
+  animation: fadeInUp 1s ease-in-out;
 }
 
 .main-content h2 {
-  color: #333;
-  margin-bottom: 10px;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: #0a192f;
+}
+
+.main-content p {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  color: #555;
+}
+
+/* Quick Action Cards */
+.card-section {
+  display: flex;
+  justify-content: space-around;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: #ffffff;
+  padding: 1.5rem;
+  border-radius: 14px;
+  flex: 1;
+  min-width: 220px;
+  color: #0a192f;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  text-align: center;
+  border-top: 4px solid #64ffda; /* accent line */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0px 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.card h3 {
+  margin: 0.8rem 0;
+  color: #112240;
+}
+
+.card-icon {
+  font-size: 2.5rem;
+  color: #1b2b4b;
+  margin-bottom: 0.5rem;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.card:hover .card-icon {
+  transform: scale(1.2);
+  color: #64ffda;
+}
+
+/* Stats Section */
+.stats-section {
+  display: flex;
+  justify-content: space-around;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.stat-box {
+  background: #f9fbfd;
+  padding: 1.2rem;
+  border-radius: 12px;
+  flex: 1;
+  min-width: 200px;
+  text-align: center;
+  border: 1px solid #e0e6ed;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-box:hover {
+  transform: translateY(-6px);
+  box-shadow: 0px 8px 18px rgba(100, 255, 218, 0.2);
+}
+
+.stat-box h4 {
+  margin-bottom: 0.5rem;
+  color: #112240;
+}
+
+.stat-box p {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1b2b4b;
+}
+
+/* Settings Shortcuts */
+.settings-shortcuts {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.shortcut-btn {
+  background: #1b2b4b;
+  border: 2px solid #64ffda;
+  color: #64ffda;
+  padding: 0.7rem 1.5rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.shortcut-btn:hover {
+  background: #64ffda;
+  color: #0a192f;
+}
+
+.btn-icon {
+  font-size: 1.2rem;
+}
+
+/* Animation */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

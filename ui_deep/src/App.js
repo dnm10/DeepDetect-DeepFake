@@ -16,7 +16,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/Signup" element={<Signup />} />
-          <Route path="/2fa" element={<Twofactor />} />
+          <Route path="/twofactor" element={<Twofactor />} />   
           <Route path="/dashboard" element={<Dashboard />} />
        {  /* <Route path="/sidebar" element={<Sidebar />} />  */}
           <Route path="/navbar" element={<Navbar />} />

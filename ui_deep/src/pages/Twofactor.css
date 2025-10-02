@@ -1,75 +1,81 @@
-.twofactor-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background: linear-gradient(135deg, #232526, #414345);
-  font-family: "Segoe UI", sans-serif;
-}
-
-.twofactor-box {
-  background: #fff;
-  padding: 35px 30px;
-  border-radius: 14px;
-  width: 350px;
+/* Container styling */
+.auth-container {
+  max-width: 400px;
+  margin: 80px auto;
+  padding: 40px;
+  background: #ffffff;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
   text-align: center;
-  box-shadow: 0px 8px 28px rgba(0, 0, 0, 0.18);
-  animation: zoomIn 0.7s ease;
+  animation: fadeIn 0.8s ease-in-out;
 }
 
-.twofactor-box h2 {
-  margin-bottom: 20px;
-  font-size: 22px;
-  color: #333;
-}
-
-.twofactor-box p {
+/* Heading */
+.auth-container h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e3a8a; /* dark blue */
   margin-bottom: 15px;
-  font-size: 14px;
-  color: #666;
 }
 
-.twofactor-box input {
+/* Info text */
+.auth-container p {
+  font-size: 15px;
+  color: #475569; /* slate gray */
+  margin-bottom: 20px;
+}
+
+/* Input styling */
+.auth-container input {
   width: 100%;
   padding: 12px;
-  margin: 10px 0;
-  border: 1px solid #bbb;
+  margin-bottom: 15px;
+  border: 2px solid #cbd5e1;
   border-radius: 8px;
+  font-size: 16px;
   outline: none;
-  font-size: 15px;
-  letter-spacing: 2px;
-  text-align: center;
-}
-
-.twofactor-box input:focus {
-  border-color: #414345;
-}
-
-.twofactor-box button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 15px;
-  background: linear-gradient(135deg, #ff512f, #dd2476);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 15px;
-  cursor: pointer;
   transition: 0.3s;
 }
 
-.twofactor-box button:hover {
-  transform: scale(1.03);
-  opacity: 0.95;
+.auth-container input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 8px rgba(37, 99, 235, 0.2);
 }
 
-@keyframes zoomIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+/* Buttons */
+.auth-container button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.3s ease;
+}
+
+.auth-container button:hover {
+  transform: scale(1.05);
+  background: linear-gradient(90deg, #3b82f6, #1e40af);
+}
+
+.auth-container button:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* Error message */
+.auth-container p[style] {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
 }
