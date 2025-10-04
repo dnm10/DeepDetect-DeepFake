@@ -3,6 +3,8 @@ import mysql from "mysql2";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import cors from "cors";
+import crypto from "crypto";
+import nodemailer from "nodemailer";
 
 dotenv.config();
 
@@ -26,12 +28,13 @@ db.connect((err) => {
   console.log("✅ Connected to MySQL Database");
 });
 
+// ================== AUTH ROUTES ==================
+
 // Signup route
 app.post("/signup", async (req, res) => {
   const { name, email, contact, password } = req.body;
 
   try {
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const sql =
@@ -73,7 +76,66 @@ app.post("/login", (req, res) => {
   });
 });
 
-// Run server
-app.listen(process.env.PORT, () => {
-  console.log(`🚀 Server running on port ${process.env.PORT}`);
+// ================== OTP ROUTES ==================
+
+// Temporary storage (better use DB/Redis)
+let otpStorage = {};
+
+// Configure transporter (sender email)
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "deepdetect2025@gmail.com",    // sender email
+    pass: "wzpt vrpo kylo rogq"          // app password
+  }
 });
+
+// Step 1: Send OTP
+app.post("/send-otp", async (req, res) => {
+  const { email } = req.body;
+
+  const otp = crypto.randomInt(100000, 999999);
+
+  otpStorage[email] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 };
+
+  try {
+    await transporter.sendMail({
+      from: "deepdetect2025@gmail.com",  // must match sender
+      to: email,                         // recipient = user email
+      subject: "Your OTP Code",
+      text: `Your OTP is ${otp}. It will expire in 5 minutes.`,
+    });
+
+    res.json({ success: true, message: "OTP sent to your email" });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Failed to send OTP", error: err });
+  }
+});
+
+// Step 2: Verify OTP
+app.post("/verify-otp", (req, res) => {
+  const { email, otp } = req.body;
+
+  if (!otpStorage[email]) {
+    return res.status(400).json({ success: false, message: "No OTP found. Please request again." });
+  }
+
+  const { otp: storedOtp, expiresAt } = otpStorage[email];
+
+  if (Date.now() > expiresAt) {
+    delete otpStorage[email];
+    return res.status(400).json({ success: false, message: "OTP expired" });
+  }
+
+  if (parseInt(otp) === storedOtp) {
+    delete otpStorage[email];
+    return res.json({ success: true, message: "OTP verified successfully" });
+  } else {
+    return res.status(400).json({ success: false, message: "Invalid OTP" });
+  }
+});
+
+// ================== START SERVER ==================
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
