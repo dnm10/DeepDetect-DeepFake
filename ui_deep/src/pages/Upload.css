@@ -1,0 +1,96 @@
+/* Upload Page Styling */
+.upload-container {
+  text-align: center;
+  padding: 40px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 25px;
+  color: #1e3a8a;
+}
+
+.upload-card {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.upload-card:hover {
+  transform: translateY(-5px);
+}
+
+.upload-box {
+  display: block;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 2px dashed #1e3a8a;
+  border-radius: 12px;
+  background: #f8fafc;
+  cursor: pointer;
+  font-size: 16px;
+  color: #475569;
+  transition: background 0.3s ease, border 0.3s ease;
+}
+
+.upload-box:hover {
+  background: #e0f2fe;
+  border-color: #0284c7;
+}
+
+.detect-btn {
+  background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.3s ease;
+}
+
+.detect-btn:hover {
+  transform: scale(1.05);
+  background: linear-gradient(90deg, #3b82f6, #1e40af);
+}
+
+.detect-btn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+.results {
+  margin-top: 30px;
+  padding: 20px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  display: inline-block;
+  text-align: left;
+}
+
+.results h3 {
+  margin: 0 0 10px;
+  color: #1e293b;
+}
+
+.results p {
+  font-size: 18px;
+  font-weight: 500;
+  color: #dc2626; /* red for fake warning */
+}
+
+/* Fade-in animation */
+.fade-in {
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
