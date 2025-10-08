@@ -35,17 +35,36 @@ async def predict_image(file: UploadFile = File(...)):
     Accepts an uploaded image from React frontend,
     returns prediction (Real/Fake) and confidence (%).
     """
-    # Read image bytes
-    image_bytes = await file.read()
-    image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-    img_t = transform(image).unsqueeze(0).to(device)
+    try:
+      
+        image_bytes = await file.read()
+        image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        img_t = transform(image).unsqueeze(0).to(device)
 
-    # Model prediction
-    with torch.no_grad():
-        output = model(img_t)
-        probs = F.softmax(output, dim=1)
-        pred = torch.argmax(probs, dim=1).item()
-        confidence = probs[0][pred].item() * 100
+       
+        model.eval()
 
-    label = "Real" if pred == 0 else "Fake"
-    return {"prediction": label, "confidence": round(confidence, 2)}
+        
+        with torch.no_grad():
+            output = model(img_t)
+
+            
+            temperature = 10.0  
+            probs = F.softmax(output / temperature, dim=1).cpu().numpy()[0]
+            # -----------------------------
+
+        
+        pred_idx = int(probs.argmax())
+        confidence = float(probs[pred_idx]) * 100
+        confidence = round(confidence, 2)
+        label = "Real" if pred_idx == 0 else "Fake"
+
+        
+        print("Raw model output:", output)
+        print("Softmax probs:", probs)
+
+        return {"prediction": label, "confidence": confidence}
+
+    except Exception as e:
+        print("Error:", e)
+        return {"error": f"Prediction failed: {str(e)}"}
