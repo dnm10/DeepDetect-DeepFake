@@ -17,7 +17,7 @@
 }
 
 .navbar-left h1 {
-  font-size: 1.6rem;
+  font-size: 28px;
   color: #ffffff;
   font-weight: bold;
   letter-spacing: 2px;
@@ -38,6 +38,7 @@
 .navbar-right ul {
   list-style: none;
   display: flex;
+  font-size: 29px;
   gap: 1.8rem;
   margin: 0;
   padding: 0;
@@ -59,12 +60,12 @@
   height: 2px;
   bottom: -4px;
   left: 0;
-  background-color: #64ffda;
+  background-color: #7ac1ff;
   transition: width 0.3s ease;
 }
 
 .navbar-right ul li a:hover {
-  color: #64ffda;
+  color: #61a0ff;
 }
 
 .navbar-right ul li a:hover::after {

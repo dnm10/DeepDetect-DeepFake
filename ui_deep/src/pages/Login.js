@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Login.css";
+import LOGO from "../LOGO.PNG";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -67,9 +68,11 @@ function Login() {
   return (
     <div className="auth-wrapper">
       <div className="logo-section">
-        <img src="/logo192.png" alt="App Logo" className="logo" />
+     
+        <img src={LOGO} alt="App Logo" className="logo" />
+
         <h1>DeepDetect</h1>
-        <p>Your Shield Against Deepfakes</p>
+        <p>Shield Against Deepfakes</p>
       </div>
 
       <div className="form-section">

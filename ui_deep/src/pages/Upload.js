@@ -1,12 +1,12 @@
 import React, { useState, useRef } from "react";
 import Navbar from "../Components/Navbar.js";
-import './Upload.css';
+import "./Upload.css";
 
 function Upload() {
   const [file, setFile] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [preview, setPreview] = useState(null); 
+  const [preview, setPreview] = useState(null);
 
   const fileInputRef = useRef();
 
@@ -15,7 +15,7 @@ function Upload() {
     if (selectedFile) {
       setFile(selectedFile);
       setResult(null);
-      setPreview(URL.createObjectURL(selectedFile)); 
+      setPreview(URL.createObjectURL(selectedFile));
     }
   };
 
@@ -50,6 +50,13 @@ function Upload() {
     }
   };
 
+  const reuploadImage = () => {
+    setFile(null);
+    setPreview(null);
+    setResult(null);
+    fileInputRef.current.click(); // immediately open file picker
+  };
+
   return (
     <div className="dashboard">
       <Navbar />
@@ -65,6 +72,7 @@ function Upload() {
               accept="image/*"
               style={{ display: "none" }}
             />
+
             <div
               className="upload-box"
               onClick={openFileDialog}
@@ -83,25 +91,37 @@ function Upload() {
               </div>
             )}
 
-            <button
-              className="detect-btn"
-              onClick={runDetection}
-              disabled={!file || loading}
-              style={{ marginTop: "10px" }}
-            >
-              {loading ? "Detecting..." : "Run Detection"}
-            </button>
+            <div className="button-group" style={{ marginTop: "10px" }}>
+              <button
+                className="detect-btn"
+                onClick={runDetection}
+                disabled={!file || loading}
+              >
+                {loading ? "Detecting..." : "Run Detection"}
+              </button>
+
+              {file && !loading && (
+                <button
+                  className="reupload-btn"
+                  onClick={reuploadImage}
+                  style={{
+                    marginLeft: "10px",
+                    backgroundColor: "#f0f0f0",
+                    color: "#333",
+                  }}
+                >
+                  🔁 Re-upload
+                </button>
+              )}
+            </div>
 
             {result && (
-            <div className="results fade-in">
-              <h3>Results:</h3>
-              <p>{result}</p>
-            </div>
+              <div className="results fade-in">
+                <h3>Results:</h3>
+                <p>{result}</p>
+              </div>
             )}
-          
           </div>
-
-          
         </div>
       </div>
     </div>

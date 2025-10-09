@@ -1,62 +1,86 @@
 /* Upload Page Styling */
-.upload-container {
-  text-align: center;
-  padding: 40px;
-}
 
+/* Title */
 .title {
-  font-size: 28px;
-  font-weight: bold;
-  margin-bottom: 25px;
-  color: #1e3a8a;
+  font-size: 38px;
+  font-weight: 700;
+  margin-bottom: 30px;
+  margin-left: 150px;
+  color: #1e3a8a; /* deep blue */
+  text-shadow: 0 2px 6px rgba(59, 130, 246, 0.15);
+  animation: floatUp 1s ease-in-out;
 }
 
+/* Upload Card */
 .upload-card {
   background: #ffffff;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  display: inline-block;
-  transition: all 0.3s ease;
+  padding: 60px 80px;
+  border-radius: 20px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.4s ease;
+  border-top: 5px solid #3b82f6;
+  max-width: 700px;
+  width: 100%;
+  animation: floatIn 1.2s ease-in-out;
 }
 
 .upload-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-8px);
+  box-shadow: 0 16px 45px rgba(59, 130, 246, 0.2);
 }
 
+/* Upload Box (drop zone) */
 .upload-box {
-  display: block;
-  padding: 20px;
-  margin-bottom: 20px;
-  border: 2px dashed #1e3a8a;
-  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 50px;
+  margin-bottom: 35px;
+  border: 2px dashed #3b82f6;
+  border-radius: 15px;
   background: #f8fafc;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 18px;
+  font-weight: 500;
   color: #475569;
-  transition: background 0.3s ease, border 0.3s ease;
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
 }
 
 .upload-box:hover {
-  background: #e0f2fe;
-  border-color: #0284c7;
+  background: #f1f5f9;
+  border-color: #2563eb;
+  transform: scale(1.03);
 }
 
+/* Upload Icon */
+.upload-icon {
+  font-size: 48px;
+  color: #2563eb;
+  margin-bottom: 12px;
+  animation: pulse 2s infinite ease-in-out;
+}
+
+/* Detect Button */
 .detect-btn {
   background: linear-gradient(90deg, #1e3a8a, #3b82f6);
   color: white;
   border: none;
-  padding: 12px 25px;
-  font-size: 16px;
+  padding: 14px 45px;
+  font-size: 18px;
   font-weight: 600;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: transform 0.2s ease, background 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .detect-btn:hover {
-  transform: scale(1.05);
+  transform: scale(1.06);
   background: linear-gradient(90deg, #3b82f6, #1e40af);
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
 }
 
 .detect-btn:disabled {
@@ -64,33 +88,74 @@
   cursor: not-allowed;
 }
 
+/* Results Section */
 .results {
-  margin-top: 30px;
-  padding: 20px;
-  border-radius: 12px;
-  background: #f1f5f9;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-  display: inline-block;
+  margin-top: 45px;
+  padding: 30px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
   text-align: left;
+  width: 100%;
+  max-width: 650px;
+  border-left: 5px solid #3b82f6;
+  animation: fadeInUp 1.2s ease;
 }
 
 .results h3 {
   margin: 0 0 10px;
   color: #1e293b;
+  font-size: 22px;
+  font-weight: 600;
 }
 
 .results p {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 500;
   color: #dc2626; /* red for fake warning */
 }
 
-/* Fade-in animation */
-.fade-in {
-  animation: fadeIn 0.8s ease-in-out;
+/* Re-upload Button */
+.reupload-btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #e2e8f0;
+  color: #1e3a8a;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
 }
 
+.reupload-btn:hover {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+/* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(15px); }
+  from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes floatIn {
+  0% { opacity: 0; transform: translateY(40px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes floatUp {
+  from { transform: translateY(15px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.1); opacity: 1; }
 }

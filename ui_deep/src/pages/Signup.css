@@ -24,8 +24,10 @@
 }
 
 .logo-section .logo {
-  width: 80px;
-  margin-bottom: 20px;
+  width: 250px;
+  margin-bottom: 5px;
+  height: 250px;
+  border-radius: 12px;
 }
 
 .logo-section h1 {
