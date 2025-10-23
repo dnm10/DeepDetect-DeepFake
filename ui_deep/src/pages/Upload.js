@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import Navbar from "../Components/Navbar.js";
-import { FaUpload, FaCheck, FaTimes, FaDownload, FaSpinner } from "react-icons/fa";
+import { FaUpload, FaCheck, FaTimes, FaDownload, FaSpinner, FaTimesCircle } from "react-icons/fa";
 import "./Upload.css";
 
 function Upload() {
@@ -10,6 +10,7 @@ function Upload() {
   const [analysisResult, setAnalysisResult] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef(null);
+  const analysisTimeoutRef = useRef(null);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -72,12 +73,12 @@ function Upload() {
     }, 200);
 
     // Simulate analysis
-    setTimeout(() => {
+    analysisTimeoutRef.current = setTimeout(() => {
       clearInterval(uploadInterval);
       setUploadProgress(100);
       
       // Simulate analysis completion
-      setTimeout(() => {
+      const completionTimeout = setTimeout(() => {
         const isFake = Math.random() > 0.5;
         setAnalysisResult({
           isFake,
@@ -86,6 +87,9 @@ function Upload() {
         });
         setIsAnalyzing(false);
       }, 1500);
+
+      // Store completion timeout for cancellation
+      analysisTimeoutRef.current = completionTimeout;
     }, 2000);
   };
 
@@ -96,6 +100,20 @@ function Upload() {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+  };
+
+  const handleCancel = () => {
+    setIsAnalyzing(false);
+    setUploadProgress(0);
+    
+    // Clear any ongoing timeouts
+    if (analysisTimeoutRef.current) {
+      clearTimeout(analysisTimeoutRef.current);
+      analysisTimeoutRef.current = null;
+    }
+    
+    // Reset analysis state
+    setAnalysisResult(null);
   };
 
   const handleReupload = () => {
@@ -136,7 +154,7 @@ function Upload() {
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => !file && fileInputRef.current?.click()}
             >
               <FaUpload className="upload-icon" />
               <div className="upload-text">
@@ -197,32 +215,54 @@ function Upload() {
             )}
 
             <div className="upload-actions">
-              <button 
-                className="detect-btn"
-                onClick={simulateAnalysis}
-                disabled={!file || isAnalyzing}
-              >
-                {isAnalyzing ? (
-                  <>
-                    <FaSpinner className="loading-spinner" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
+              {!file ? (
+                <div className="no-file-message">
+                  Please select a file to begin analysis
+                </div>
+              ) : isAnalyzing ? (
+                <div className="analysis-buttons">
+                  <button 
+                    className="cancel-btn"
+                    onClick={handleCancel}
+                  >
+                    <FaTimesCircle />
+                    Cancel Analysis
+                  </button>
+                </div>
+              ) : analysisResult ? (
+                <div className="post-analysis-buttons">
+                  <button 
+                    className="detect-btn"
+                    onClick={simulateAnalysis}
+                  >
+                    <FaUpload />
+                    Analyze Again
+                  </button>
+                  <button 
+                    className="clear-btn"
+                    onClick={handleClear}
+                  >
+                    <FaTimesCircle />
+                    Clear File
+                  </button>
+                </div>
+              ) : (
+                <div className="pre-analysis-buttons">
+                  <button 
+                    className="detect-btn"
+                    onClick={simulateAnalysis}
+                  >
                     <FaUpload />
                     Detect Deepfake
-                  </>
-                )}
-              </button>
-              
-              {file && (
-                <button 
-                  className="clear-btn"
-                  onClick={handleClear}
-                  disabled={isAnalyzing}
-                >
-                  Clear
-                </button>
+                  </button>
+                  <button 
+                    className="clear-btn"
+                    onClick={handleClear}
+                  >
+                    <FaTimesCircle />
+                    Clear File
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -267,6 +307,7 @@ function Upload() {
 
                   <div className="results-actions">
                     <button className="reupload-btn" onClick={handleReupload}>
+                      <FaUpload />
                       Analyze Another File
                     </button>
                     <button className="download-btn">
