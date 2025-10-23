@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Navbar from "../Components/Navbar.js";
 import {
   FaUpload,
@@ -7,10 +7,43 @@ import {
   FaCog,
   FaLock,
   FaPalette,
+  FaTwitter,
+  FaLinkedin,
+  FaGithub,
+  FaEnvelope
 } from "react-icons/fa";
 import "./Dashboard.css";
 import { Link } from "react-router-dom";
+
 function Dashboard() {
+  useEffect(() => {
+    // Add floating particles to cards
+    const cards = document.querySelectorAll('.card');
+    
+    cards.forEach(card => {
+      createParticles(card);
+    });
+  }, []);
+
+  const createParticles = (card) => {
+    const particlesContainer = document.createElement('div');
+    particlesContainer.className = 'particles';
+    
+    for (let i = 0; i < 8; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      
+      // Random position and animation delay
+      particle.style.left = `${Math.random() * 100}%`;
+      particle.style.animationDelay = `${Math.random() * 6}s`;
+      particle.style.animationDuration = `${4 + Math.random() * 4}s`;
+      
+      particlesContainer.appendChild(particle);
+    }
+    
+    card.appendChild(particlesContainer);
+  };
+
   return (
     <div className="dashboard">
       <Navbar />
@@ -18,34 +51,41 @@ function Dashboard() {
       <div className="dashboard-body">
         <div className="main-content">
           <h2>Welcome to DeepDetect Dashboard</h2>
-          <p>Choose an option below to get started </p>
+          <p>Choose an option below to get started</p>
 
           {/* Quick Actions */}
           <div className="card-section">
             <Link to="/upload" className="card-link">
-              <div className="card">
-                <FaUpload className="card-icon" />
-                <h3>Upload</h3>
-                <p>Upload new media for deepfake detection.</p>
+              <div className="card card-upload">
+                <div className="card-content">
+                  <FaUpload className="card-icon" />
+                  <h3>Upload</h3>
+                  <p>Upload new media for deepfake detection.</p>
+                </div>
               </div>
             </Link>
 
-             <Link to="/history" className="card-link">
-              <div className="card">
-                <FaUpload className="card-icon" />
-                <h3>History</h3>
-                <p>Check previous uploads</p>
+            <Link to="/history" className="card-link">
+              <div className="card card-history">
+                <div className="card-content">
+                  <FaHistory className="card-icon" />
+                  <h3>History</h3>
+                  <p>Check previous uploads and results</p>
+                </div>
               </div>
             </Link>
 
-             <Link to="/reports" className="card-link">
-              <div className="card">
-                <FaUpload className="card-icon" />
-                <h3>Reports</h3>
-                <p>Generate detailed reports</p>
+            <Link to="/reports" className="card-link">
+              <div className="card card-reports">
+                <div className="card-content">
+                  <FaFileAlt className="card-icon" />
+                  <h3>Reports</h3>
+                  <p>Generate detailed analysis reports</p>
+                </div>
               </div>
             </Link>
-           </div>
+          </div>
+
           {/* Stats */}
           <div className="stats-section">
             <div className="stat-box">
@@ -62,7 +102,7 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* Settings Shortcuts 
+          {/* Settings Shortcuts - Uncomment if needed
           <div className="settings-shortcuts">
             <button className="shortcut-btn">
               <FaCog className="btn-icon" /> Profile Settings
@@ -77,6 +117,34 @@ function Dashboard() {
           */}
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="dashboard-footer">
+        <div className="footer-content">
+          <div className="footer-logo">
+            DeepDetect
+          </div>
+          
+          <div className="footer-links">
+            <a href="/privacy" className="footer-link">Privacy Policy</a>
+            <a href="/terms" className="footer-link">Terms of Service</a>
+            <a href="/about" className="footer-link">About Us</a>
+            <a href="/contact" className="footer-link">Contact</a>
+            <a href="/help" className="footer-link">Help Center</a>
+          </div>
+          
+          <div className="footer-social">
+            <FaTwitter className="social-icon" />
+            <FaLinkedin className="social-icon" />
+            <FaGithub className="social-icon" />
+            <FaEnvelope className="social-icon" />
+          </div>
+          
+          <div className="footer-copyright">
+            <p>&copy; 2024 DeepDetect. All rights reserved. | Advanced Deepfake Detection Technology</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -1,90 +1,481 @@
-/* History Page Styling */
-.history-container {
-  text-align: center;
-  padding: 60px 40px;
-  background: linear-gradient(180deg, #ffffff, #f0f4f8);
+/* =============================
+   HISTORY PAGE — DeepDetect Theme
+   ============================= */
+
+.history-page {
+  background: linear-gradient(180deg, #0a192f, #112b47, #1a3c63);
   min-height: 100vh;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #ffffff;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  overflow-x: hidden;
+  position: relative;
 }
 
-/* Page title */
-.history-container h2 {
-  font-size: 2rem;
-  color: #1e3a8a;
-  margin-bottom: 25px;
+/* Animated background effects */
+.history-page::before {
+  content: "";
+  position: absolute;
+  top: -100px;
+  right: -100px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(0, 180, 255, 0.2), transparent 70%);
+  filter: blur(60px);
+  z-index: 0;
+  animation: pulseGlow 8s ease-in-out infinite alternate;
 }
 
-/* History table/card area */
-.history-table {
+.history-page::after {
+  content: "";
+  position: absolute;
+  bottom: -100px;
+  left: -100px;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(102, 217, 255, 0.15), transparent 70%);
+  filter: blur(50px);
+  z-index: 0;
+  animation: pulseGlow 6s ease-in-out infinite alternate-reverse;
+}
+
+/* Main container */
+.history-container {
+  padding: 2rem;
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
   margin: 0 auto;
-  background: #ffffff;
-  border-radius: 15px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  padding: 25px;
-  max-width: 1000px;
-  transition: all 0.3s ease;
-  animation: fadeInUp 0.8s ease-in-out;
+  animation: fadeInUp 0.8s ease-out;
 }
 
-.history-table table {
+/* Header Section */
+.history-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  animation: slideDown 0.8s ease-out;
+}
+
+.history-title {
+  font-size: 3rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #00b4ff, #66d9ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+  text-shadow: 0 0 30px rgba(0, 180, 255, 0.3);
+}
+
+.history-subtitle {
+  font-size: 1.2rem;
+  color: #bcd2e8;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Stats Overview */
+.stats-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 180, 255, 0.2);
+  border-radius: 15px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.stat-card:hover {
+  border-color: rgba(0, 180, 255, 0.4);
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0, 180, 255, 0.15);
+}
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.stat-total .stat-value {
+  color: #00b4ff;
+}
+
+.stat-real .stat-value {
+  color: #00ff88;
+}
+
+.stat-fake .stat-value {
+  color: #ff6b6b;
+}
+
+.stat-label {
+  color: #bcd2e8;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Filters and Search */
+.history-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+  animation: fadeIn 0.8s ease-out;
+}
+
+.search-box {
+  position: relative;
+  flex: 1;
+  max-width: 400px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.8rem 1rem 0.8rem 2.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(0, 180, 255, 0.3);
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #00b4ff;
+  box-shadow: 0 0 0 2px rgba(0, 180, 255, 0.2);
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8fa3bf;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 0.6rem 1.2rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #bcd2e8;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.filter-btn:hover {
+  background: rgba(0, 180, 255, 0.1);
+  border-color: #00b4ff;
+  color: #00b4ff;
+}
+
+.filter-btn.active {
+  background: rgba(0, 180, 255, 0.2);
+  border-color: #00b4ff;
+  color: #00b4ff;
+}
+
+/* History Table */
+.history-table-container {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 180, 255, 0.2);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  animation: fadeInUp 0.8s ease-out;
+  overflow: hidden;
+}
+
+.history-table {
   width: 100%;
   border-collapse: collapse;
+  margin: 0;
 }
 
-.history-table th,
-.history-table td {
-  padding: 15px 20px;
-  text-align: center;
-  border-bottom: 1px solid #e2e8f0;
+.history-table thead {
+  background: rgba(0, 180, 255, 0.1);
+  border-bottom: 2px solid rgba(0, 180, 255, 0.3);
 }
 
 .history-table th {
-  background-color: #e0f2fe;
-  color: #1e3a8a;
-  font-weight: 700;
-}
-
-.history-table tr:hover {
-  background-color: #f8fafc;
-  transition: background 0.3s ease;
-}
-
-/* Status badges */
-.status-fake {
-  color: #dc2626;
+  padding: 1.2rem 1rem;
+  color: #e6f4ff;
   font-weight: 600;
-}
-
-.status-real {
-  color: #16a34a;
-  font-weight: 600;
-}
-
-/* Reupload or view button */
-.view-btn {
-  background: linear-gradient(90deg, #1e3a8a, #3b82f6);
-  color: white;
+  font-size: 1rem;
+  text-align: left;
   border: none;
-  border-radius: 8px;
-  padding: 8px 14px;
-  cursor: pointer;
-  font-weight: 600;
+}
+
+.history-table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
 }
 
-.view-btn:hover {
-  transform: scale(1.05);
-  background: linear-gradient(90deg, #3b82f6, #1e40af);
+.history-table tbody tr:hover {
+  background: rgba(0, 180, 255, 0.05);
+  transform: translateX(5px);
 }
 
-/* Fade-in animation */
+.history-table td {
+  padding: 1.2rem 1rem;
+  color: #bcd2e8;
+  border: none;
+}
+
+/* File Name with Icon */
+.file-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.file-icon {
+  color: #00b4ff;
+  font-size: 1.2rem;
+}
+
+.file-name {
+  font-weight: 500;
+  color: #e6f4ff;
+}
+
+/* Result Badges */
+.result-badge {
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-align: center;
+  display: inline-block;
+  min-width: 80px;
+}
+
+.fake-result {
+  background: rgba(255, 107, 107, 0.2);
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.real-result {
+  background: rgba(0, 255, 136, 0.2);
+  color: #00ff88;
+  border: 1px solid rgba(0, 255, 136, 0.3);
+}
+
+/* Confidence Meter */
+.confidence-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.confidence-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  max-width: 80px;
+}
+
+.confidence-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.fake-result .confidence-fill {
+  background: linear-gradient(90deg, #ff6b6b, #ff4757);
+}
+
+.real-result .confidence-fill {
+  background: linear-gradient(90deg, #00ff88, #00cc6a);
+}
+
+/* Action Buttons */
+.actions-cell {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  padding: 0.5rem 0.8rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.view-btn {
+  background: rgba(0, 180, 255, 0.2);
+  color: #00b4ff;
+  border: 1px solid rgba(0, 180, 255, 0.3);
+}
+
+.view-btn:hover {
+  background: rgba(0, 180, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.delete-btn {
+  background: rgba(255, 107, 107, 0.2);
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.delete-btn:hover {
+  background: rgba(255, 107, 107, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #8fa3bf;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  color: #4a5568;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pagination-btn {
+  padding: 0.6rem 1.2rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #bcd2e8;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: rgba(0, 180, 255, 0.1);
+  border-color: #00b4ff;
+  color: #00b4ff;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  color: #8fa3bf;
+  font-size: 0.9rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 @keyframes fadeInUp {
-  0% {
+  from {
     opacity: 0;
     transform: translateY(30px);
   }
-  100% {
+  to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseGlow {
+  from {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .history-container {
+    padding: 1rem;
+  }
+  
+  .history-title {
+    font-size: 2.2rem;
+  }
+  
+  .history-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-box {
+    max-width: none;
+  }
+  
+  .stats-overview {
+    grid-template-columns: 1fr;
+  }
+  
+  .history-table-container {
+    padding: 1rem;
+    overflow-x: auto;
+  }
+  
+  .history-table {
+    min-width: 700px;
+  }
+  
+  .actions-cell {
+    flex-direction: column;
   }
 }
