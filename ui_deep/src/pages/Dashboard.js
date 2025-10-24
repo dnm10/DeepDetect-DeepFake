@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../Components/Navbar.js";
 import {
   FaUpload,
@@ -16,13 +16,18 @@ import "./Dashboard.css";
 import { Link } from "react-router-dom";
 
 function Dashboard() {
+  const [history, setHistory] = useState([]);
+
   useEffect(() => {
+    // Fetch history from backend
+    fetch("http://localhost:5000/history")
+      .then(res => res.json())
+      .then(data => setHistory(data))
+      .catch(err => console.error("Error fetching history:", err));
+
     // Add floating particles to cards
     const cards = document.querySelectorAll('.card');
-    
-    cards.forEach(card => {
-      createParticles(card);
-    });
+    cards.forEach(card => createParticles(card));
   }, []);
 
   const createParticles = (card) => {
@@ -32,17 +37,19 @@ function Dashboard() {
     for (let i = 0; i < 8; i++) {
       const particle = document.createElement('div');
       particle.className = 'particle';
-      
-      // Random position and animation delay
       particle.style.left = `${Math.random() * 100}%`;
       particle.style.animationDelay = `${Math.random() * 6}s`;
       particle.style.animationDuration = `${4 + Math.random() * 4}s`;
-      
       particlesContainer.appendChild(particle);
     }
     
     card.appendChild(particlesContainer);
   };
+
+  // Stats calculation
+  const totalScans = history.length;
+  const deepfakesDetected = history.filter(item => item.result === "Fake").length;
+  const reportsGenerated = history.filter(item => item.result === "Real" || item.result === "Fake").length;
 
   return (
     <div className="dashboard">
@@ -90,41 +97,24 @@ function Dashboard() {
           <div className="stats-section">
             <div className="stat-box">
               <h4>Scans Completed</h4>
-              <p>0</p>
+              <p>{totalScans}</p>
             </div>
             <div className="stat-box">
               <h4>Deepfakes Detected</h4>
-              <p>0</p>
+              <p>{deepfakesDetected}</p>
             </div>
             <div className="stat-box">
               <h4>Reports Generated</h4>
-              <p>0</p>
+              <p>{reportsGenerated}</p>
             </div>
           </div>
-
-          {/* Settings Shortcuts - Uncomment if needed
-          <div className="settings-shortcuts">
-            <button className="shortcut-btn">
-              <FaCog className="btn-icon" /> Profile Settings
-            </button>
-            <button className="shortcut-btn">
-              <FaLock className="btn-icon" /> Security
-            </button>
-            <button className="shortcut-btn">
-              <FaPalette className="btn-icon" /> Preferences
-            </button>
-          </div>
-          */}
         </div>
       </div>
 
       {/* Footer */}
       <footer className="dashboard-footer">
         <div className="footer-content">
-          <div className="footer-logo">
-            DeepDetect
-          </div>
-          
+          <div className="footer-logo">DeepDetect</div>
           <div className="footer-links">
             <a href="/privacy" className="footer-link">Privacy Policy</a>
             <a href="/terms" className="footer-link">Terms of Service</a>
@@ -132,14 +122,12 @@ function Dashboard() {
             <a href="/contact" className="footer-link">Contact</a>
             <a href="/help" className="footer-link">Help Center</a>
           </div>
-          
           <div className="footer-social">
             <FaTwitter className="social-icon" />
             <FaLinkedin className="social-icon" />
             <FaGithub className="social-icon" />
             <FaEnvelope className="social-icon" />
           </div>
-          
           <div className="footer-copyright">
             <p>&copy; 2024 DeepDetect. All rights reserved. | Advanced Deepfake Detection Technology</p>
           </div>
