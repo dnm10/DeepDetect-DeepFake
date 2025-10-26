@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Navbar from "../Components/Navbar.js";
 import { 
   FaDownload, 
@@ -7,125 +7,167 @@ import {
   FaShieldAlt, 
   FaClock,
   FaCheckCircle,
-  FaFilePdf,
-  FaSync
+  FaSync,
+  FaImage,
+  FaFilePdf 
 } from "react-icons/fa";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 import "./Reports.css";
 
 function Reports() {
-  const [selectedItem, setSelectedItem] = useState("");
-  const [isGenerated, setIsGenerated] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [reportData, setReportData] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const fileInputRef = useRef();
 
-  const historyData = [
-    { 
-      id: 1, 
-      fileName: "profile_photo.jpg", 
-      date: "2024-03-15", 
-      result: "Fake", 
-      confidence: 97,
-      fileSize: "2.4 MB",
-      analysisTime: "3.2s",
-      detectionModel: "Advanced CNN v2.1"
-    },
-    { 
-      id: 2, 
-      fileName: "vacation_pic.png", 
-      date: "2024-03-14", 
-      result: "Real", 
-      confidence: 91,
-      fileSize: "3.1 MB",
-      analysisTime: "2.8s",
-      detectionModel: "Advanced CNN v2.1"
-    },
-    { 
-      id: 3, 
-      fileName: "document.jpg", 
-      date: "2024-03-13", 
-      result: "Fake", 
-      confidence: 88,
-      fileSize: "1.8 MB",
-      analysisTime: "2.5s",
-      detectionModel: "Advanced CNN v2.1"
-    },
-  ];
+  // Handle file selection
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setUploadedFile(file);
+      setReportData(null); // reset previous report
+    }
+  };
 
-  const selectedFileData = historyData.find(item => item.fileName === selectedItem);
+  const openFileDialog = () => fileInputRef.current.click();
 
-  const handleGenerate = () => {
-    if (selectedItem) {
-      setIsGenerating(true);
-      // Simulate report generation
-      setTimeout(() => {
-        setIsGenerating(false);
-        setIsGenerated(true);
-      }, 2000);
+  // Generate report using ML backend
+  const handleGenerateReport = async () => {
+    if (!uploadedFile) return;
+
+    setIsGenerating(true);
+    setReportData(null);
+
+    const formData = new FormData();
+    formData.append("file", uploadedFile);
+
+    try {
+      const response = await fetch("http://localhost:8000/predict/", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("Network error");
+
+      const data = await response.json();
+
+      const newReport = {
+        fileName: uploadedFile.name,
+        fileSize: `${(uploadedFile.size / (1024 * 1024)).toFixed(2)} MB`,
+        date: new Date().toLocaleDateString(),
+        result: data.prediction,
+        confidence: data.confidence,
+        detectionModel: "Advanced CNN v2.1",
+        analysisTime: "Real-time",
+      };
+
+      setReportData(newReport);
+
+      // Optional: Save report to server history
+      await fetch("http://localhost:5000/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fileName: newReport.fileName,
+          result: newReport.result,
+          confidence: newReport.confidence,
+        }),
+      });
+
+    } catch (error) {
+      console.error(error);
+      alert("Error generating report: " + error.message);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
   const handleNewReport = () => {
-    setSelectedItem("");
-    setIsGenerated(false);
+    setUploadedFile(null);
+    setReportData(null);
   };
 
+  // Generate PDF using jsPDF
   const handleDownload = () => {
-    alert(`Downloading report for: ${selectedItem}`);
-    // In real implementation, this would download the PDF
+    if (!reportData) return;
+
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text("Deepfake Analysis Report", 14, 22);
+
+    doc.setFontSize(12);
+    doc.text(`File Name: ${reportData.fileName}`, 14, 40);
+    doc.text(`Date: ${reportData.date}`, 14, 50);
+    doc.text(`File Size: ${reportData.fileSize}`, 14, 60);
+    doc.text(`Detection Model: ${reportData.detectionModel}`, 14, 70);
+    doc.text(`Detection Result: ${reportData.result}`, 14, 80);
+    doc.text(`Confidence Level: ${reportData.confidence}%`, 14, 90);
+    doc.text(`Analysis Time: ${reportData.analysisTime}`, 14, 100);
+
+    // Confidence bar
+    doc.setDrawColor(0);
+    const barWidth = reportData.confidence * 1.5;
+    doc.setFillColor(reportData.result === "Fake" ? 255 : 0, reportData.result === "Fake" ? 0 : 255, 0);
+    doc.rect(14, 105, barWidth, 10, "F");
+
+    doc.save(`${reportData.fileName}_report.pdf`);
   };
 
   return (
     <div className="reports-page">
       <Navbar />
-      
+
       <div className="reports-container">
-        {/* Header */}
         <div className="reports-header">
-          <h1 className="reports-title">Analysis Reports</h1>
+          <h1 className="reports-title">Real-Time Analysis Reports</h1>
           <p className="reports-subtitle">
-            Generate comprehensive deepfake detection reports with detailed analysis and insights
+            Upload an image and generate an instant AI-powered detection report.
           </p>
         </div>
 
-        {/* Main Content */}
         <div className="reports-content">
-          {/* Report Generation Section */}
+          {/* Upload & Generate Section */}
           <div className="report-generation-card">
-            <div className="form-group">
-              <label htmlFor="select-item" className="form-label">
-                Select Analysis Result
-              </label>
-              <select
-                id="select-item"
-                className="report-select"
-                value={selectedItem}
-                onChange={(e) => {
-                  setSelectedItem(e.target.value);
-                  setIsGenerated(false);
-                }}
-              >
-                <option value="">-- Choose a file --</option>
-                {historyData.map((item) => (
-                  <option key={item.id} value={item.fileName}>
-                    {item.fileName} ({item.result} - {item.date})
-                  </option>
-                ))}
-              </select>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept="image/*"
+              style={{ display: "none" }}
+            />
+
+            <div
+              className="upload-box"
+              onClick={openFileDialog}
+              style={{ cursor: "pointer" }}
+            >
+              {uploadedFile ? (
+                <span>{uploadedFile.name}</span>
+              ) : (
+                <span>📂 Click to choose an image</span>
+              )}
             </div>
+
+            {uploadedFile && (
+              <p className="file-info">
+                <FaImage /> {uploadedFile.name} ({(uploadedFile.size / (1024 * 1024)).toFixed(2)} MB)
+              </p>
+            )}
 
             <button
               className="generate-btn"
-              onClick={handleGenerate}
-              disabled={!selectedItem || isGenerating}
+              onClick={handleGenerateReport}
+              disabled={!uploadedFile || isGenerating}
             >
               {isGenerating ? (
                 <>
-                  <FaSync className="loading-spinner" />
-                  Generating Report...
+                  <FaSync className="loading-spinner" /> Generating Report...
                 </>
               ) : (
                 <>
-                  <FaFileAlt />
-                  Generate Detailed Report
+                  <FaFileAlt /> Generate Report
                 </>
               )}
             </button>
@@ -133,64 +175,47 @@ function Reports() {
 
           {/* Report Preview Section */}
           <div className="report-preview-section">
-            {isGenerated && selectedFileData ? (
+            {reportData ? (
               <div className="report-preview-card fade-in">
                 <div className="preview-header">
                   <FaCheckCircle style={{ color: '#00ff88', fontSize: '3rem', marginBottom: '1rem' }} />
-                  <h3 className="preview-title">Report Generated Successfully</h3>
-                  <p className="preview-subtitle">Comprehensive analysis report is ready</p>
+                  <h3 className="preview-title">Report Generated</h3>
+                  <p className="preview-subtitle">AI-based analysis completed successfully</p>
                 </div>
 
                 <div className="report-details">
+                  <div className="detail-item"><span>File Name:</span> <span>{reportData.fileName}</span></div>
+                  <div className="detail-item"><span>Date:</span> <span>{reportData.date}</span></div>
+                  <div className="detail-item"><span>File Size:</span> <span>{reportData.fileSize}</span></div>
+                  <div className="detail-item"><span>Model:</span> <span>{reportData.detectionModel}</span></div>
                   <div className="detail-item">
-                    <span className="detail-label">File Name:</span>
-                    <span className="detail-value">{selectedFileData.fileName}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Analysis Date:</span>
-                    <span className="detail-value">{selectedFileData.date}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">File Size:</span>
-                    <span className="detail-value">{selectedFileData.fileSize}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Detection Result:</span>
-                    <span className={`result-badge ${selectedFileData.result === 'Fake' ? 'badge-fake' : 'badge-real'}`}>
-                      {selectedFileData.result}
+                    <span>Result:</span> 
+                    <span className={`result-badge ${reportData.result === "Fake" ? "badge-fake" : "badge-real"}`}>
+                      {reportData.result}
                     </span>
                   </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Detection Model:</span>
-                    <span className="detail-value">{selectedFileData.detectionModel}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Analysis Time:</span>
-                    <span className="detail-value">{selectedFileData.analysisTime}</span>
-                  </div>
+                  <div className="detail-item"><span>Analysis Time:</span> <span>{reportData.analysisTime}</span></div>
                 </div>
 
                 <div className="confidence-meter">
                   <div className="confidence-header">
                     <span className="confidence-label">Confidence Level</span>
-                    <span className="confidence-value">{selectedFileData.confidence}%</span>
+                    <span className="confidence-value">{reportData.confidence}%</span>
                   </div>
                   <div className="confidence-bar">
                     <div 
                       className="confidence-fill"
-                      style={{ width: `${selectedFileData.confidence}%` }}
+                      style={{ width: `${reportData.confidence}%` }}
                     ></div>
                   </div>
                 </div>
 
                 <div className="report-actions">
                   <button className="download-btn" onClick={handleDownload}>
-                    <FaFilePdf />
-                    Download PDF Report
+                    <FaFilePdf /> Download PDF Report
                   </button>
                   <button className="new-report-btn" onClick={handleNewReport}>
-                    <FaSync />
-                    New Report
+                    <FaSync /> New Report
                   </button>
                 </div>
               </div>
@@ -198,9 +223,9 @@ function Reports() {
               <div className="report-preview-card">
                 <div className="empty-preview">
                   <FaFileAlt className="empty-icon" />
-                  <div className="empty-text">No Report Generated</div>
+                  <div className="empty-text">No Report Yet</div>
                   <div className="empty-subtext">
-                    Select a file and generate a report to see the preview
+                    Upload an image and generate a report to see the results here
                   </div>
                 </div>
               </div>
@@ -210,35 +235,27 @@ function Reports() {
 
         {/* Report Features */}
         <div className="report-features">
-          <h3 className="features-title">What's Included in Your Report</h3>
+          <h3 className="features-title">What's Inside Your Report</h3>
           <div className="features-grid">
             <div className="feature-card">
               <FaChartBar className="feature-icon" />
               <div className="feature-title">Detailed Analysis</div>
-              <div className="feature-desc">
-                Comprehensive breakdown of detection methods and confidence scores
-              </div>
+              <div className="feature-desc">Comprehensive breakdown with model confidence and decision metrics</div>
             </div>
             <div className="feature-card">
               <FaShieldAlt className="feature-icon" />
-              <div className="feature-title">Security Insights</div>
-              <div className="feature-desc">
-                Technical details about detected manipulations and security implications
-              </div>
+              <div className="feature-title">Integrity Check</div>
+              <div className="feature-desc">Verifies manipulation traces and authenticity clues</div>
             </div>
             <div className="feature-card">
               <FaFileAlt className="feature-icon" />
-              <div className="feature-title">Professional Format</div>
-              <div className="feature-desc">
-                PDF reports with professional layout suitable for presentations and documentation
-              </div>
+              <div className="feature-title">Professional Report</div>
+              <div className="feature-desc">Auto-generated PDF reports ready for sharing or documentation</div>
             </div>
             <div className="feature-card">
               <FaClock className="feature-icon" />
-              <div className="feature-title">Historical Tracking</div>
-              <div className="feature-desc">
-                Track detection patterns and model performance over time
-              </div>
+              <div className="feature-title">Instant Processing</div>
+              <div className="feature-desc">Real-time analysis within seconds of image upload</div>
             </div>
           </div>
         </div>
