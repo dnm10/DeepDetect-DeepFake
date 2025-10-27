@@ -148,7 +148,7 @@ function About() {
           </div>
         </section>
 
-        {/* Team Section */}
+        {/* Team Section 
         <section className="team-section">
           <h2 className="section-title">Meet the Team</h2>
           <div className="team-grid">
@@ -161,7 +161,7 @@ function About() {
               </div>
             ))}
           </div>
-        </section>
+        </section> */}
 
         {/* CTA Section */}
         <section className="cta-section">

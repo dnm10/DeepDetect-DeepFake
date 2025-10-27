@@ -85,7 +85,7 @@ function History() {
                     <td>{item.confidence}%</td>
                     <td>
                       <button onClick={() => handleView(item)}><FaEye /> View</button>
-                      <button onClick={() => handleDelete(item)}><FaTrash /> Delete</button>
+                     {/* <button onClick={() => handleDelete(item)}><FaTrash /> Delete</button>*/}
                     </td>
                   </tr>
                 ))}
