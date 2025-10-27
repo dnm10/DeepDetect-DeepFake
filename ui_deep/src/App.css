@@ -1,7 +1,7 @@
 .App {
   text-align: center;
-  min-height: 100vh;
-  overflow: visible;
+  /* min-height: 100vh; */
+  overflow: hidden;
 }
 
 .App-logo {
