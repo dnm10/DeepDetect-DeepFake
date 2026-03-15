@@ -25,9 +25,22 @@ function Upload() {
 
     if (!selectedFile) return;
 
-    setFile(selectedFile);
-    setPreview(URL.createObjectURL(selectedFile));
+    const validTypes = ["image/png", "image/jpeg", "image/jpg"];
 
+    if (!validTypes.includes(selectedFile.type)) {
+      alert("Only PNG, JPG, JPEG images are allowed.");
+      return;
+    }
+
+    setFile(selectedFile);
+
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      setPreview(reader.result);
+    };
+
+    reader.readAsDataURL(selectedFile);
   };
 
   const openFileDialog = () => {
@@ -54,9 +67,12 @@ function Upload() {
         body: formData
       });
 
-      if (!response.ok) throw new Error("Prediction failed");
-
       const data = await response.json();
+
+        if (data.error) {
+          alert(data.error);
+          return;
+        }
 
       const reportData = {
         id: Date.now(),
@@ -71,6 +87,13 @@ function Upload() {
         width: data.width,
         height: data.height,
         inference_time: data.inference_time,
+
+        gradcam: data.gradcam,
+        fft: data.fft,
+        face_heatmap: data.face_heatmap,
+        prob_chart: data.prob_chart,
+        confidence_gauge: data.confidence_gauge,
+
         date: new Date().toLocaleString()
       };
 
@@ -78,6 +101,11 @@ function Upload() {
       let history = JSON.parse(localStorage.getItem("reports")) || [];
 
       history.unshift(reportData);
+
+      // keep only latest 10 reports
+      if (history.length > 10) {
+        history = history.slice(0, 10);
+      }
 
       localStorage.setItem("reports", JSON.stringify(history));
 
@@ -127,7 +155,7 @@ function Upload() {
               type="file"
               ref={fileInputRef}
               onChange={handleUpload}
-              accept="image/*"
+              accept="image/png, image/jpeg, image/jpg"
               style={{ display: "none" }}
             />
 

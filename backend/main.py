@@ -19,81 +19,90 @@ from predict_utils import (
 
 app = FastAPI()
 
-# Allow React frontend
+# CORS for React
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Device selection
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load trained model
 model = load_model("best_resnet_model_3class.pth", device)
+model.eval()
 
-# Image transform
+# Image preprocessing (must match training)
 transform = transforms.Compose([
     transforms.Resize(256),
     transforms.CenterCrop(224),
-    transforms.ToTensor()
+    transforms.ToTensor(),
+    transforms.Normalize(
+        mean=[0.485,0.456,0.406],
+        std=[0.229,0.224,0.225]
+    )
 ])
 
-# Class labels (same order used during training)
-CLASS_NAMES = ["Real", "Fake", "Synthetic"]
-
-
-# =====================================
-# FAST PREDICTION ENDPOINT
-# =====================================
+# ================================
+# FAST DETECTION ENDPOINT
+# ================================
 @app.post("/predict/")
 async def predict_image(file: UploadFile = File(...)):
 
-    start = time.time()
+    try:
 
-    image_bytes = await file.read()
-    image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        start = time.time()
 
-    width, height = image.size
+        image_bytes = await file.read()
+        image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
 
-    img_tensor = transform(image).unsqueeze(0).to(device)
+        width, height = image.size
 
-    with torch.no_grad():
-        output = model(img_tensor)
-        probs = F.softmax(output, dim=1).cpu().numpy()[0]
+        img_tensor = transform(image).unsqueeze(0).to(device)
 
-    pred_idx = int(np.argmax(probs))
-    label = CLASS_NAMES[pred_idx]
+        with torch.no_grad():
+            output = model(img_tensor)
+            probs = F.softmax(output, dim=1).cpu().numpy()[0]
 
-    # Map Synthetic → Fake
-    if label == "Synthetic":
-        label = "Fake"
+        print("Model probabilities:", probs)
 
-    confidence = float(probs[pred_idx]) * 100
-    confidence = round(confidence, 2)
+        # Model class order:
+        # 0 → fake
+        # 1 → real
+        # 2 → synthetic
 
-    real_prob = round(float(probs[0]) * 100, 2)
-    fake_prob = round(float(probs[1]) * 100, 2)
+        fake_prob = float(probs[0]) + float(probs[2])
+        real_prob = float(probs[1])
 
-    inference_time = round(time.time() - start, 3)
+        prediction = "Real" if real_prob > fake_prob else "Fake"
+        confidence = max(real_prob, fake_prob)
 
-    return {
-        "prediction": label,
-        "confidence": confidence,
-        "fake_prob": fake_prob,
-        "real_prob": real_prob,
-        "width": width,
-        "height": height,
-        "model": "ResNet18",
-        "inference_time": inference_time
-    }
+        real_prob = round(real_prob * 100, 2)
+        fake_prob = round(fake_prob * 100, 2)
+        confidence = round(confidence * 100, 2)
+
+        inference_time = round(time.time() - start, 3)
+
+        return {
+            "prediction": prediction,
+            "confidence": confidence,
+            "fake_prob": fake_prob,
+            "real_prob": real_prob,
+            "width": width,
+            "height": height,
+            "model": "ResNet18",
+            "inference_time": inference_time
+        }
+
+    except Exception as e:
+        return {"error": str(e)}
 
 
-# =====================================
-# REPORT GENERATION ENDPOINT
-# =====================================
+# ================================
+# REPORT ANALYSIS (FOR PDF)
+# ================================
 @app.post("/generate-report/")
 async def generate_report(file: UploadFile = File(...)):
 
@@ -101,19 +110,24 @@ async def generate_report(file: UploadFile = File(...)):
     image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
 
     img_array = np.array(image)
-
     img_tensor = transform(image).unsqueeze(0).to(device)
 
-    # Model inference for probabilities
     with torch.no_grad():
         output = model(img_tensor)
         probs = F.softmax(output, dim=1).cpu().numpy()[0]
 
-    real_prob = round(float(probs[0]) * 100, 2)
-    fake_prob = round(float(probs[1]) * 100, 2)
+    # Convert 3-class → binary
+    fake_prob = float(probs[0]) + float(probs[2])
+    real_prob = float(probs[1])
+
+    prediction = "Real" if real_prob > fake_prob else "Fake"
     confidence = max(real_prob, fake_prob)
 
-    # Generate analysis images
+    real_prob = round(real_prob * 100, 2)
+    fake_prob = round(fake_prob * 100, 2)
+    confidence = round(confidence * 100, 2)
+
+    # Generate visual explanations
     gradcam = generate_gradcam(model, img_tensor, img_array)
     fft = generate_fft(img_array)
     face_heatmap = generate_face_heatmap(img_array)
@@ -122,6 +136,10 @@ async def generate_report(file: UploadFile = File(...)):
     confidence_gauge = generate_confidence_gauge(confidence)
 
     return {
+        "prediction": prediction,
+        "confidence": confidence,
+        "real_prob": real_prob,
+        "fake_prob": fake_prob,
         "gradcam": gradcam,
         "fft": fft,
         "face_heatmap": face_heatmap,

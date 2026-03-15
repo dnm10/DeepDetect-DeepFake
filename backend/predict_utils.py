@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-import torch
 import base64
 import matplotlib.pyplot as plt
 from io import BytesIO
@@ -9,7 +8,9 @@ from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
 
 
-# Convert image to base64
+# =========================
+# Convert image → Base64
+# =========================
 def encode_image(img):
 
     _, buffer = cv2.imencode(".png", img)
@@ -20,23 +21,46 @@ def encode_image(img):
 # =========================
 # GradCAM
 # =========================
-def generate_gradcam(model, input_tensor, image):
+def generate_gradcam(model, input_tensor, img_array):
 
     target_layer = model.layer4[-1]
 
-    cam = GradCAM(
-        model=model,
-        target_layers=[target_layer],
-        use_cuda=torch.cuda.is_available()
-    )
+    cam = GradCAM(model=model, target_layers=[target_layer])
 
-    grayscale_cam = cam(input_tensor=input_tensor)[0]
+    # Generate heatmap
+    grayscale_cam = cam(input_tensor)[0]
 
-    rgb_img = np.float32(image) / 255
+    # Resize original image to match model input
+    rgb_img = cv2.resize(img_array, (224, 224))
+    rgb_img = rgb_img.astype(np.float32) / 255.0
 
+    # Overlay heatmap
     visualization = show_cam_on_image(rgb_img, grayscale_cam, use_rgb=True)
 
+    # Convert to BGR for OpenCV encoding
+    visualization = cv2.cvtColor(visualization, cv2.COLOR_RGB2BGR)
+
     return encode_image(visualization)
+
+
+# =========================
+# Face Heatmap
+# =========================
+def generate_face_heatmap(image):
+
+    # Ensure BGR format
+    if image.shape[2] == 3:
+        img_bgr = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+    else:
+        img_bgr = image
+
+    heatmap = cv2.GaussianBlur(img_bgr, (55, 55), 0)
+
+    heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
+
+    overlay = cv2.addWeighted(img_bgr, 0.6, heatmap, 0.4, 0)
+
+    return encode_image(overlay)
 
 
 # =========================
@@ -50,7 +74,7 @@ def generate_fft(image):
 
     fshift = np.fft.fftshift(f)
 
-    magnitude = 20 * np.log(np.abs(fshift) + 1)
+    magnitude = np.log(np.abs(fshift) + 1)
 
     magnitude = cv2.normalize(magnitude, None, 0, 255, cv2.NORM_MINMAX)
 
@@ -62,29 +86,14 @@ def generate_fft(image):
 
 
 # =========================
-# Face Heatmap
-# =========================
-def generate_face_heatmap(image):
-
-    heatmap = cv2.GaussianBlur(image, (55, 55), 0)
-
-    heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
-
-    overlay = cv2.addWeighted(image, 0.6, heatmap, 0.4, 0)
-
-    return encode_image(overlay)
-
-
-# =========================
 # Probability Chart
 # =========================
 def generate_probability_chart(real_prob, fake_prob):
 
     labels = ["Real", "Fake"]
-
     values = [real_prob, fake_prob]
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(4,3))
 
     ax.bar(labels, values, color=["green", "red"])
 
@@ -93,8 +102,8 @@ def generate_probability_chart(real_prob, fake_prob):
 
     buf = BytesIO()
 
-    plt.savefig(buf, format="png")
-
+    plt.tight_layout()
+    plt.savefig(buf, format="png", bbox_inches="tight", dpi=150)
     plt.close()
 
     buf.seek(0)
@@ -107,18 +116,24 @@ def generate_probability_chart(real_prob, fake_prob):
 # =========================
 def generate_confidence_gauge(confidence):
 
-    fig, ax = plt.subplots()
+    import matplotlib.pyplot as plt
+    import base64
+    from io import BytesIO
+
+    fig, ax = plt.subplots(figsize=(6,2))
 
     ax.barh(["Confidence"], [confidence], color="blue")
 
-    ax.set_xlim(0, 100)
+    ax.set_xlim(0,100)
 
-    ax.set_title("Model Confidence")
+    ax.set_xlabel("Confidence (%)")
+
+    ax.set_title(f"Model Confidence: {confidence:.2f}%")
 
     buf = BytesIO()
 
-    plt.savefig(buf, format="png")
-
+    plt.tight_layout()
+    plt.savefig(buf, format="png", dpi=150)
     plt.close()
 
     buf.seek(0)
