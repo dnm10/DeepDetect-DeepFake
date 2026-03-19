@@ -13,17 +13,24 @@ function Reports() {
   const [reportData, setReportData] = useState(location.state || null);
   const [history, setHistory] = useState([]);
 
-  useEffect(() => {
+useEffect(() => {
 
-    const saved = JSON.parse(localStorage.getItem("reports")) || [];
+  if (location.state) {
+    setReportData(location.state);
 
-    setHistory(saved);
+    // ✅ save latest
+    localStorage.setItem("latestReport", JSON.stringify(location.state));
 
-    if (!reportData && saved.length > 0) {
-      setReportData(saved[0]);
+  } else {
+    const saved = localStorage.getItem("latestReport");
+
+    if (saved) {
+      setReportData(JSON.parse(saved));
     }
+  }
 
-  }, [reportData]);
+}, [location.state]);
+
 
 
   /* =============================
@@ -40,18 +47,17 @@ function Reports() {
       const pageWidth = doc.internal.pageSize.getWidth();
 
       /* ==========================
-        Convert uploaded image
+        Convert uploaded image (SAFE)
       ========================== */
 
       const getBase64Image = (url) => {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
 
           const img = new Image();
           img.crossOrigin = "Anonymous";
           img.src = url;
 
           img.onload = () => {
-
             const canvas = document.createElement("canvas");
             canvas.width = img.width;
             canvas.height = img.height;
@@ -61,14 +67,45 @@ function Reports() {
 
             resolve(canvas.toDataURL("image/jpeg"));
           };
+
+          img.onerror = () => reject("Image load failed");
         });
       };
 
-      const uploadedImage = await getBase64Image(reportData.image_url);
+      let uploadedImage = null;
+
+      if (reportData.image_url) {
+        try {
+          uploadedImage = await getBase64Image(reportData.image_url);
+        } catch (e) {
+          console.log("Image load failed");
+        }
+      }
 
       /* ==========================
-        CALL BACKEND FOR ANALYSIS
+        BACKEND CALL (SAFE)
       ========================== */
+
+     
+
+      let analysis = {};
+
+if (reportData.file) {
+
+  const formData = new FormData();
+  formData.append("file", reportData.file);
+
+  const response = await fetch("http://localhost:8000/generate-report/", {
+    method: "POST",
+    body: formData
+  });
+
+  analysis = await response.json();
+
+} else {
+  console.log("No file → skipping backend analysis");
+}
+
 
       const formData = new FormData();
       formData.append("file", reportData.file);
@@ -78,7 +115,7 @@ function Reports() {
         body: formData
       });
 
-      const analysis = await response.json();
+      analysis = await response.json();
 
       if (!analysis.gradcam) {
         alert("Backend analysis failed");
@@ -97,39 +134,24 @@ function Reports() {
 
       doc.line(10, 32, 200, 32);
 
-      /* RESULT BANNER */
-
       doc.setFontSize(14);
 
       if (reportData.prediction === "Fake") {
-
         doc.setTextColor(200, 0, 0);
         doc.text("RESULT: FAKE IMAGE DETECTED", pageWidth / 2, 40, { align: "center" });
-
       } else {
-
         doc.setTextColor(0, 150, 0);
         doc.text("RESULT: AUTHENTIC IMAGE", pageWidth / 2, 40, { align: "center" });
-
       }
 
       doc.setTextColor(0, 0, 0);
 
-      /* Uploaded Image */
-
       doc.setFontSize(14);
       doc.text("Uploaded Image", 14, 55);
 
-      doc.addImage(
-        uploadedImage,
-        "JPEG",
-        40,
-        60,
-        120,
-        80
-      );
-
-      /* Detection Summary */
+      if (uploadedImage) {
+        doc.addImage(uploadedImage, "JPEG", 40, 60, 120, 80);
+      }
 
       doc.setFontSize(14);
       doc.text("Detection Summary", 14, 150);
@@ -149,9 +171,8 @@ function Reports() {
         ],
       });
 
-
       /* ==========================
-        PAGE 2 - AI FORENSICS
+        PAGE 2
       ========================== */
 
       doc.addPage();
@@ -159,100 +180,36 @@ function Reports() {
       doc.setFontSize(18);
       doc.text("AI Forensic Analysis", 14, 20);
 
-      /* GradCAM */
+      if (analysis.gradcam) {
+        doc.text("GradCAM Attention Map", 14, 35);
+        doc.addImage(`data:image/png;base64,${analysis.gradcam}`, "PNG", 14, 40, 85, 85);
+      }
 
-      doc.setFontSize(12);
-      doc.text("GradCAM Attention Map", 14, 35);
+      if (analysis.face_heatmap) {
+        doc.text("Face Heatmap", 110, 35);
+        doc.addImage(`data:image/png;base64,${analysis.face_heatmap}`, "PNG", 110, 40, 85, 85);
+      }
 
-      doc.addImage(`data:image/png;base64,${analysis.gradcam}`, "PNG", 14, 40, 85, 85);
+      if (analysis.fft) {
+        doc.text("Frequency Spectrum (FFT)", 14, 145);
+        doc.addImage(`data:image/png;base64,${analysis.fft}`, "PNG", 14, 150, 85, 85);
+      }
 
-      doc.setFontSize(9);
-      doc.text(
-        "Highlights regions the AI focused on while making the prediction.",
-        14,
-        130
-      );
-
-      /* Face Heatmap */
-
-      doc.setFontSize(12);
-      doc.text("Face Heatmap", 110, 35);
-
-      doc.addImage(`data:image/png;base64,${analysis.face_heatmap}`, "PNG", 110, 40, 85, 85);
-
-      doc.setFontSize(9);
-      doc.text(
-        "Shows facial areas where manipulation artifacts may exist.",
-        110,
-        130
-      );
-
-      /* FFT */
-
-      doc.setFontSize(12);
-      doc.text("Frequency Spectrum (FFT)", 14, 145);
-
-      doc.addImage(`data:image/png;base64,${analysis.fft}`, "PNG", 14, 150, 85, 85);
-
-      doc.setFontSize(9);
-      doc.text(
-        "Frequency spectrum revealing abnormal pixel patterns.",
-        14,
-        240
-      );
-
-      /* Probability Chart */
-
-      doc.setFontSize(12);
-      doc.text("Prediction Probability", 110, 145);
-
-      doc.addImage(`data:image/png;base64,${analysis.prob_chart}`, "PNG", 110, 150, 85, 85);
-
-      doc.setFontSize(9);
-      doc.text(
-        "Probability distribution of the model prediction.",
-        110,
-        240
-      );
-
+      if (analysis.prob_chart) {
+        doc.text("Prediction Probability", 110, 145);
+        doc.addImage(`data:image/png;base64,${analysis.prob_chart}`, "PNG", 110, 150, 85, 85);
+      }
 
       /* ==========================
-        PAGE 3 - CONFIDENCE
+        PAGE 3
       ========================== */
 
-      doc.addPage();
-
-      doc.setFontSize(18);
-      doc.text("Model Confidence", 14, 20);
-
-      doc.addImage(`data:image/png;base64,${analysis.confidence_gauge}`, "PNG", 14, 30, 180, 90);
-
-
-      /* ==========================
-        PAGE 4 - INTERPRETATION
-      ========================== */
-
-      // doc.addPage();
-
-      // doc.setFontSize(18);
-      // doc.text("Analysis Explanation", 14, 20);
-
-      // doc.setFontSize(11);
-
-      // doc.text(
-      // `GradCAM Visualization identifies the regions of the image that most influenced the model's prediction.
-
-      // Face Heatmap highlights facial regions where abnormal smoothing or blending artifacts may appear.
-
-      // Frequency Spectrum (FFT) analysis reveals irregular frequency patterns that are often associated with manipulated or synthetically generated images.
-
-      // Prediction Probability represents the model's confidence distribution for classifying the image as either real or fake.
-
-      // Together, these forensic visualizations provide supporting evidence for the model's final prediction.`,
-      // 14,
-      // 40
-      // );
-
+      if (analysis.confidence_gauge) {
+        doc.addPage();
+        doc.setFontSize(18);
+        doc.text("Model Confidence", 14, 20);
+        doc.addImage(`data:image/png;base64,${analysis.confidence_gauge}`, "PNG", 14, 30, 180, 90);
+      }
 
       /* ==========================
         FOOTER
@@ -274,9 +231,8 @@ function Reports() {
         );
       }
 
-
       /* ==========================
-        SAVE PDF
+        SAVE
       ========================== */
 
       doc.save(`${reportData.fileName}_Deepfake_Report.pdf`);
@@ -319,10 +275,11 @@ function Reports() {
           <h3>Uploaded Image</h3>
 
           <img
-            src={reportData.image_url}
-            alt="uploaded"
-            className="uploaded-image"
-          />
+  src={reportData.image_url || "https://via.placeholder.com/300"}
+  alt="uploaded"
+  className="uploaded-image"
+/>
+
 
         </div>
 
@@ -372,49 +329,6 @@ function Reports() {
           <button className="download-btn" onClick={handleDownload}>
             <FaFilePdf /> Download PDF Report
           </button>
-
-        </div>
-
-        <div className="analysis-section">
-
-          <h3>Detection History</h3>
-
-          <table className="history-table">
-
-            <thead>
-              <tr>
-                <th>File Name</th>
-                <th>Prediction</th>
-                <th>Open</th>
-              </tr>
-            </thead>
-
-            <tbody>
-
-              {history.length === 0 ? (
-                <tr>
-                  <td colSpan="3">No detection history</td>
-                </tr>
-              ) : (
-                history.map((item, index) => (
-                  <tr key={index}>
-                    <td>{item.fileName}</td>
-                    <td>{item.prediction}</td>
-                    <td>
-                      <button
-                        onClick={() => setReportData(item)}
-                        className="history-download"
-                      >
-                        Open
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-
-            </tbody>
-
-          </table>
 
         </div>
 

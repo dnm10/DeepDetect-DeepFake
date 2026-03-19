@@ -62,6 +62,7 @@ function Upload() {
 
     try {
 
+      // 🔹 AI Backend
       const response = await fetch("http://localhost:8000/predict/", {
         method: "POST",
         body: formData
@@ -69,10 +70,10 @@ function Upload() {
 
       const data = await response.json();
 
-        if (data.error) {
-          alert(data.error);
-          return;
-        }
+      if (data.error) {
+        alert(data.error);
+        return;
+      }
 
       const reportData = {
         id: Date.now(),
@@ -97,19 +98,28 @@ function Upload() {
         date: new Date().toLocaleString()
       };
 
-      // Save locally for history
+      // 🔥 NEW: Save to backend DB
+      await fetch("http://localhost:5000/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          fileName: file.name,
+          result: data.prediction,
+          confidence: data.confidence
+        })
+      });
+
+      // OLD localStorage (optional, kept as backup)
       let history = JSON.parse(localStorage.getItem("reports")) || [];
-
       history.unshift(reportData);
-
-      // keep only latest 10 reports
       if (history.length > 10) {
         history = history.slice(0, 10);
       }
-
       localStorage.setItem("reports", JSON.stringify(history));
 
-      // Navigate to report page
+      localStorage.setItem("latestReport", JSON.stringify(reportData));
       navigate("/reports", { state: reportData });
 
     } catch (error) {
