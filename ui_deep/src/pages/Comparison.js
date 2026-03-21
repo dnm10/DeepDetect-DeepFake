@@ -78,7 +78,7 @@ function Comparison() {
       <Navbar />
 
       <div className="comparison-container">
-        <h1>Model Comparison</h1>
+        <h1><Models></Models> Comparison</h1>
 
         {/* 🏆 Best Model */}
         {bestModel && (

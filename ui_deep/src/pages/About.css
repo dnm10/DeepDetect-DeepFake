@@ -473,3 +473,28 @@
     padding: 1.5rem;
   }
 }
+
+.workflow-section {
+  margin-top: 50px;
+  text-align: center;
+}
+
+.workflow-steps {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.step {
+  background: #1e2a38;
+  padding: 20px;
+  border-radius: 10px;
+  width: 150px;
+  margin: 10px;
+}
+
+.step svg {
+  font-size: 30px;
+  color: #00d4ff;
+}

@@ -1,5 +1,4 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import Navbar from "../Components/Navbar.js";
 import {
   FaShieldAlt,
@@ -7,103 +6,44 @@ import {
   FaRocket,
   FaUpload,
   FaFilePdf,
-  FaPython,
-  FaReact,
-  FaDatabase,
-  FaGitAlt,
-  FaAws,
-  FaCheckCircle,
+  FaChartBar,
+  FaCheckCircle
 } from "react-icons/fa";
 import "./About.css";
 
 function About() {
-  const navigate = useNavigate();
-
-  const teamMembers = [
-    {
-      id: 1,
-      name: "Dr. Sarah Chen",
-      role: "AI Research Lead",
-      bio: "PhD in Computer Vision, ResNet & deepfake detection expert.",
-      initials: "SC",
-    },
-    {
-      id: 2,
-      name: "Marcus Rodriguez",
-      role: "Lead Developer",
-      bio: "Full-stack developer building React frontend & Python backend.",
-      initials: "MR",
-    },
-    {
-      id: 3,
-      name: "Dr. Emily Watson",
-      role: "Security Analyst",
-      bio: "Cybersecurity and digital media authentication expert.",
-      initials: "EW",
-    },
-    {
-      id: 4,
-      name: "Alex Thompson",
-      role: "Product Manager",
-      bio: "Responsible AI and product strategy specialist.",
-      initials: "AT",
-    },
-  ];
 
   const features = [
     {
       icon: <FaBrain />,
-      title: "Real-Time Detection",
+      title: "AI-Powered Detection",
       description:
-        "Upload images and instantly detect AI-generated deepfakes using ResNet-based ML models.",
+        "Utilizes deep learning models including ResNet18, EfficientNet, and MobileNet for robust deepfake detection."
+    },
+    {
+      icon: <FaChartBar />,
+      title: "Model Comparison",
+      description:
+        "Compare multiple architectures to analyze performance using accuracy, F1 score, and confusion matrices."
     },
     {
       icon: <FaFilePdf />,
-      title: "PDF Reports",
+      title: "Detailed Reports",
       description:
-        "Generate detailed reports of each analysis for documentation and sharing.",
+        "Generate professional reports including Grad-CAM, FFT analysis, and confidence metrics."
     },
     {
       icon: <FaShieldAlt />,
-      title: "High Accuracy",
+      title: "High Reliability",
       description:
-        "State-of-the-art ResNet models ensure reliable deepfake detection.",
+        "Designed to detect manipulated media with high precision and minimal false positives."
     },
     {
       icon: <FaRocket />,
-      title: "Fast & Efficient",
+      title: "Fast Processing",
       description:
-        "Optimized processing ensures quick analysis without sacrificing accuracy.",
-    },
-  ];
-
-  const techStack = [
-    {
-      icon: <FaPython />,
-      name: "Python",
-      description: "Backend API & Machine Learning Models (ResNet)",
-    },
-    {
-      icon: <FaReact />,
-      name: "React.js",
-      description: "Frontend User Interface",
-    },
-    {
-      icon: <FaDatabase />,
-      name: "MySQL",
-      description: "Store report history and user data",
-    },
-    {
-      icon: <FaGitAlt />,
-      name: "Git",
-      description: "Version control & model code management",
-    },
-    { icon: <FaAws />, name: "AWS", description: "Cloud deployment & hosting" },
-    {
-      icon: <FaShieldAlt />,
-      name: "CSS",
-      description: "Styling and responsive design",
-    },
+        "Optimized inference pipeline ensures real-time predictions with minimal delay."
+    }
   ];
 
   return (
@@ -111,16 +51,32 @@ function About() {
       <Navbar />
 
       <div className="about-container">
-        {/* Hero Section */}
+
+        {/* HERO */}
         <section className="about-hero">
           <h1 className="about-title">About DeepDetect</h1>
           <p className="about-subtitle">
-            Detect AI-generated deepfakes with high accuracy and generate
-            comprehensive reports for analysis.
+            An AI-powered deepfake detection platform designed to identify manipulated images 
+            using advanced deep learning models and provide explainable results.
           </p>
         </section>
 
-        {/* Features Section */}
+        {/* PROJECT STORY */}
+        <section className="about-story">
+          <h2 className="section-title">Why DeepDetect?</h2>
+          <p className="about-text">
+            With the rapid growth of AI-generated content, distinguishing between real and fake 
+            media has become increasingly challenging. DeepDetect was developed to address this 
+            problem by leveraging state-of-the-art convolutional neural networks.
+          </p>
+
+          <p className="about-text">
+            The system evaluates images using multiple architectures — ResNet18, EfficientNet, 
+            and MobileNet — and compares their performance to ensure reliability and transparency.
+          </p>
+        </section>
+
+        {/* FEATURES */}
         <section className="features-section">
           <h2 className="section-title">Key Features</h2>
           <div className="features-grid">
@@ -134,51 +90,51 @@ function About() {
           </div>
         </section>
 
-        {/* Technology Stack */}
-        <section className="tech-section">
-          <h2 className="section-title">Our Technology Stack</h2>
-          <div className="tech-grid">
-            {techStack.map((tech, idx) => (
-              <div key={idx} className="tech-item">
-                <div className="tech-icon">{tech.icon}</div>
-                <h4 className="tech-name">{tech.name}</h4>
-                <p className="tech-description">{tech.description}</p>
-              </div>
-            ))}
+        {/* HOW IT WORKS */}
+        <section className="workflow-section">
+          <h2 className="section-title">How It Works</h2>
+
+          <div className="workflow-steps">
+            <div className="step">
+              <FaUpload />
+              <p>Upload Image</p>
+            </div>
+
+            <div className="step">
+              <FaBrain />
+              <p>Model Analysis</p>
+            </div>
+
+            <div className="step">
+              <FaCheckCircle />
+              <p>Prediction & Confidence</p>
+            </div>
+
+            <div className="step">
+              <FaFilePdf />
+              <p>Generate Report</p>
+            </div>
           </div>
         </section>
 
-        {/* Team Section 
-        <section className="team-section">
-          <h2 className="section-title">Meet the Team</h2>
-          <div className="team-grid">
-            {teamMembers.map((member) => (
-              <div key={member.id} className="team-card">
-                <div className="team-avatar">{member.initials}</div>
-                <h3 className="team-name">{member.name}</h3>
-                <div className="team-role">{member.role}</div>
-                <p className="team-bio">{member.bio}</p>
-              </div>
-            ))}
-          </div>
-        </section> */}
-
-        {/* CTA Section */}
+        {/* CTA */}
         <section className="cta-section">
-          <h2 className="cta-title">Get Started with DeepDetect</h2>
+          <h2 className="cta-title">Start Detecting Deepfakes</h2>
           <p className="cta-description">
-            Upload images, detect deepfakes instantly, and generate detailed PDF
-            reports.
+            Upload an image and get instant AI-powered analysis with detailed insights.
           </p>
+
           <div className="cta-buttons">
             <a href="/upload" className="cta-btn cta-primary">
               <FaUpload /> Start Detection
             </a>
-            <a href="/reports" className="cta-btn cta-secondary">
-              <FaFilePdf /> View Reports
+
+            <a href="/comparisons" className="cta-btn cta-secondary">
+              <FaChartBar /> View Model Comparison
             </a>
           </div>
         </section>
+
       </div>
     </div>
   );
