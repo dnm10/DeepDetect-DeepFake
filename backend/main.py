@@ -7,6 +7,8 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 import time
+import json
+import os
 
 from model import load_model
 from predict_utils import (
@@ -146,3 +148,13 @@ async def generate_report(file: UploadFile = File(...)):
         "prob_chart": prob_chart,
         "confidence_gauge": confidence_gauge
     }
+
+@app.get("/comparison")
+def get_comparison():
+
+    file_path = os.path.join(os.path.dirname(__file__), "results.json")
+
+    with open(file_path, "r") as f:
+        data = json.load(f)
+
+    return data

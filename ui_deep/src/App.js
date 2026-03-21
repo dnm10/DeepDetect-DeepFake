@@ -9,6 +9,7 @@ import Upload from "./pages/Upload.js";
 import About from "./pages/About.js"; 
 import Navbar from "./Components/Navbar.js";
 import Reports from "./pages/Reports.js";
+import Comparison from "./pages/Comparison.js";
 // import Sidebar from "./Components/Sidebar.js";
 import './App.css';
 
@@ -26,6 +27,8 @@ function App() {
           <Route path="/upload" element={<Upload />} />
           <Route path="/history" element={<History />} />
           <Route path="/reports" element={<Reports />} />
+
+          <Route path="/comparisons" element={<Comparison />} />
           <Route path="/About" element={<About />} /> 
         </Routes>
       </Router>

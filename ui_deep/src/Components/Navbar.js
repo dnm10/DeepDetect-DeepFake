@@ -7,15 +7,15 @@ function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-left">
-      {/*  <img src={logo} alt="Logo" className="logo" />*/}
         <h1>DeepDetect</h1>
       </div>
       <div className="navbar-right">
         <ul>
           <li><Link to="/dashboard">Dashboard</Link></li>
+          <li><Link to="/comparisons">Models</Link></li>
           <li><Link to="/upload">Upload</Link></li>
-          <li><Link to="/history">History</Link></li>
           <li><Link to="/reports">Reports</Link></li>
+          <li><Link to="/history">History</Link></li>
           <li><Link to="/about">About</Link></li>
         </ul>
       </div>
