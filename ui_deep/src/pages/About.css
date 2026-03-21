@@ -40,7 +40,7 @@
 
 /* Main container */
 .about-container {
-  padding: 2rem;
+  padding: 1rem;
   position: relative;
   z-index: 1;
   max-width: 1200px;
@@ -50,27 +50,31 @@
 /* Hero Section */
 .about-hero {
   text-align: center;
-  padding: 4rem 0 2rem;
+  padding: 1rem 0 1rem;
   animation: fadeInUp 0.8s ease-out;
 }
 
 .about-title {
+  margin: 40px 0 20px;
   font-size: 3.5rem;
   font-weight: 700;
   background: linear-gradient(135deg, #00b4ff, #66d9ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 1rem;
+  margin-bottom: 15px;
   text-shadow: 0 0 30px rgba(0, 180, 255, 0.3);
 }
 
+.about-text,
 .about-subtitle {
-  font-size: 1.3rem;
-  color: #bcd2e8;
-  max-width: 600px;
-  margin: 0 auto 2rem;
-  line-height: 1.6;
+  text-align: justify;          
+  text-justify: inter-word;     
+  max-width: 900px;             
+  margin: 0 auto;               
+  line-height: 1.8;             
+  font-size: 1.1rem;
+  color: #cbd5e1;     
 }
 
 /* Mission Section */
@@ -153,7 +157,7 @@
   font-size: 2.5rem;
   font-weight: 600;
   color: #e6f4ff;
-  margin-bottom: 3rem;
+  margin: 40px 0 20px;
   background: linear-gradient(135deg, #00b4ff, #66d9ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
