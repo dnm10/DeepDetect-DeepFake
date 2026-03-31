@@ -20,28 +20,24 @@ function Upload() {
   }, [preview]);
 
   const handleUpload = (e) => {
+  const selectedFile = e.target.files[0];
+  if (!selectedFile) return;
 
-    const selectedFile = e.target.files[0];
+  setFile(selectedFile);
 
-    if (!selectedFile) return;
+  if (preview) {
+    URL.revokeObjectURL(preview);
+  }
 
-    const validTypes = ["image/png", "image/jpeg", "image/jpg"];
-
-    if (!validTypes.includes(selectedFile.type)) {
-      alert("Only PNG, JPG, JPEG images are allowed.");
-      return;
-    }
-
-    setFile(selectedFile);
-
+  if (selectedFile.type.startsWith("image")) {
     const reader = new FileReader();
-
-    reader.onloadend = () => {
-      setPreview(reader.result);
-    };
-
+    reader.onloadend = () => setPreview(reader.result);
     reader.readAsDataURL(selectedFile);
-  };
+  } else {
+    const videoURL = URL.createObjectURL(selectedFile);
+    setPreview(videoURL);
+  }
+};
 
   const openFileDialog = () => {
 
@@ -62,8 +58,12 @@ function Upload() {
 
     try {
 
-      // 🔹 AI Backend
-      const response = await fetch("http://localhost:8000/predict/", {
+      // AI Backend
+      const endpoint = file.type.startsWith("video")
+        ? "http://localhost:8000/predict-video/"
+        : "http://localhost:8000/predict/";
+
+      const response = await fetch(endpoint, {
         method: "POST",
         body: formData
       });
@@ -81,48 +81,41 @@ function Upload() {
         fileName: file.name,
         file: file,
         image_url: preview,
+
         prediction: data.prediction,
         confidence: data.confidence,
         fake_prob: data.fake_prob,
         real_prob: data.real_prob,
+
         model: data.model,
-        width: data.width,
-        height: data.height,
         inference_time: data.inference_time,
 
-        gradcam: data.gradcam,
-        fft: data.fft,
-        face_heatmap: data.face_heatmap,
-        prob_chart: data.prob_chart,
-        confidence_gauge: data.confidence_gauge,
+        // Only for images
+        gradcam: data.gradcam || null,
+        fft: data.fft || null,
+        face_heatmap: data.face_heatmap || null,
+        prob_chart: data.prob_chart || null,
+        confidence_gauge: data.confidence_gauge || null,
 
         date: new Date().toLocaleString()
       };
 
-      // 🔥 NEW: Save to backend DB
-await fetch("http://localhost:5000/predict", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    fileName: file.name,
-    result: data.prediction,
-    confidence: data.confidence,
-    image_url: preview,
-    model: data.model,
-    width: data.width,
-    height: data.height,
-    inference_time: data.inference_time,
-    fake_prob: data.fake_prob,
-    real_prob: data.real_prob,
-    gradcam: data.gradcam,
-    fft: data.fft,
-    face_heatmap: data.face_heatmap,
-    prob_chart: data.prob_chart,
-    confidence_gauge: data.confidence_gauge
-  })
-});
+      // NEW: Save to backend DB
+    try {
+      await fetch("http://localhost:5000/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          fileName: file.name,
+          result: data.prediction,
+          confidence: data.confidence
+        })
+      });
+    } catch (err) {
+      console.log("DB save failed (ignored)");
+    }
 
 
 
@@ -180,7 +173,7 @@ await fetch("http://localhost:5000/predict", {
               type="file"
               ref={fileInputRef}
               onChange={handleUpload}
-              accept="image/png, image/jpeg, image/jpg"
+              accept="image/png, image/jpeg, image/jpg, video/mp4, video/avi, video/mov"
               style={{ display: "none" }}
             />
 
@@ -199,21 +192,25 @@ await fetch("http://localhost:5000/predict", {
             </div>
 
             {preview && (
-
               <div className="image-preview">
-
-                <img
-                  src={preview}
-                  alt="Uploaded preview"
-                  style={{
-                    maxWidth: "100%",
-                    maxHeight: "300px",
-                    marginTop: "10px"
-                  }}
-                />
-
+                {file.type.startsWith("image") ? (
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    style={{ maxWidth: "100%", maxHeight: "300px" }}
+                  />
+                ) : (
+                  <video
+                    key={preview}
+                    controls
+                    autoPlay
+                    muted
+                    style={{ maxWidth: "100%", maxHeight: "300px" }}
+                  >
+                    <source src={preview} type={file.type} />
+                  </video>
+                )}
               </div>
-
             )}
 
             <div className="button-group" style={{ marginTop: "10px" }}>
