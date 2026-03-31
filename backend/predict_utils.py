@@ -7,6 +7,12 @@ from io import BytesIO
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
 
+import os
+import shutil
+from PIL import Image
+import torch
+import torch.nn.functional as F
+
 
 # =========================
 # Convert image → Base64
@@ -139,3 +145,96 @@ def generate_confidence_gauge(confidence):
     buf.seek(0)
 
     return base64.b64encode(buf.read()).decode("utf-8")
+
+
+def extract_frames(video_path, output_folder, num_frames=8):
+    os.makedirs(output_folder, exist_ok=True)
+
+    cap = cv2.VideoCapture(video_path)
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+    if total_frames == 0:
+        return
+
+    frame_idxs = [int(i * total_frames / num_frames) for i in range(num_frames)]
+
+    count = 0
+    saved = 0
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        if count in frame_idxs:
+            cv2.imwrite(f"{output_folder}/frame_{saved}.jpg", frame)
+            saved += 1
+
+        count += 1
+
+    cap.release()
+
+
+def predict_video_frames(video_path, model, transform, device):
+    import cv2, os, shutil
+    from PIL import Image
+    import torch
+    import torch.nn.functional as F
+
+    temp_folder = "temp_frames"
+    os.makedirs(temp_folder, exist_ok=True)
+
+    cap = cv2.VideoCapture(video_path)
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+    frame_idxs = [int(i * total_frames / 8) for i in range(8)]
+
+    count, saved = 0, 0
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        if count in frame_idxs:
+            cv2.imwrite(f"{temp_folder}/frame_{saved}.jpg", frame)
+            saved += 1
+
+        count += 1
+
+    cap.release()
+
+    fake_votes = 0
+    real_votes = 0
+
+    for img_name in os.listdir(temp_folder):
+        img_path = os.path.join(temp_folder, img_name)
+        img = Image.open(img_path).convert("RGB")
+
+        img_tensor = transform(img).unsqueeze(0).to(device)
+
+        with torch.no_grad():
+            output = model(img_tensor)
+            probs = F.softmax(output, dim=1)[0]
+
+        fake_score = float(probs[0] + probs[2])
+        real_score = float(probs[1])
+
+        print(f"Frame → Fake: {fake_score:.3f}, Real: {real_score:.3f}")
+
+        # 🔥 STRICT CLASSIFICATION
+        if fake_score > real_score:
+            fake_votes += 1
+        else:
+            real_votes += 1
+
+    shutil.rmtree(temp_folder)
+
+    # 🔥 FINAL DECISION (NO CONFUSION)
+    if fake_votes > real_votes:
+        return "Fake", 0.0, 1.0
+    else:
+        return "Real", 1.0, 0.0
+
+
+

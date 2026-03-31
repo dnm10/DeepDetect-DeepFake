@@ -10,6 +10,8 @@ import time
 import json
 import os
 
+from predict_utils import predict_video_frames
+
 from model import load_model
 from predict_utils import (
     generate_gradcam,
@@ -100,6 +102,50 @@ async def predict_image(file: UploadFile = File(...)):
 
     except Exception as e:
         return {"error": str(e)}
+
+
+# VIDEO PREDICTION ENDPOINT
+@app.post("/predict-video/")
+async def predict_video(file: UploadFile = File(...)):
+
+    try:
+        start = time.time()
+
+        # Save uploaded video
+        video_bytes = await file.read()
+        video_path = "temp_video.mp4"
+
+        with open(video_path, "wb") as f:
+            f.write(video_bytes)
+
+        # Run prediction
+        prediction, real_prob, fake_prob = predict_video_frames(
+            video_path, model, transform, device
+        )
+
+        confidence = max(real_prob, fake_prob)
+
+        real_prob = round(real_prob * 100, 2)
+        fake_prob = round(fake_prob * 100, 2)
+        confidence = round(confidence * 100, 2)
+
+        inference_time = round(time.time() - start, 3)
+
+        # Cleanup
+        os.remove(video_path)
+
+        return {
+            "prediction": prediction,
+            "confidence": confidence,
+            "fake_prob": fake_prob,
+            "real_prob": real_prob,
+            "model": "ResNet18 Video",
+            "inference_time": inference_time
+        }
+
+    except Exception as e:
+        return {"error": str(e)}
+
 
 
 # ================================
