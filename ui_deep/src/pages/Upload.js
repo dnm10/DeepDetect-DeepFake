@@ -69,6 +69,7 @@ function Upload() {
       });
 
       const data = await response.json();
+      
 
       if (data.error) {
         alert(data.error);
@@ -99,17 +100,31 @@ function Upload() {
       };
 
       // 🔥 NEW: Save to backend DB
-      await fetch("http://localhost:5000/predict", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          fileName: file.name,
-          result: data.prediction,
-          confidence: data.confidence
-        })
-      });
+await fetch("http://localhost:5000/predict", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    fileName: file.name,
+    result: data.prediction,
+    confidence: data.confidence,
+    image_url: preview,
+    model: data.model,
+    width: data.width,
+    height: data.height,
+    inference_time: data.inference_time,
+    fake_prob: data.fake_prob,
+    real_prob: data.real_prob,
+    gradcam: data.gradcam,
+    fft: data.fft,
+    face_heatmap: data.face_heatmap,
+    prob_chart: data.prob_chart,
+    confidence_gauge: data.confidence_gauge
+  })
+});
+
+
 
       // OLD localStorage (optional, kept as backup)
       let history = JSON.parse(localStorage.getItem("reports")) || [];

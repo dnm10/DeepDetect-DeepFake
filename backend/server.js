@@ -121,20 +121,35 @@ app.post("/verify-otp", (req, res) => {
 
 // Add new prediction result
 app.post("/predict", (req, res) => {
-  const { fileName, result, confidence } = req.body;
-  if (!fileName || !result || !confidence) {
-    return res.status(400).json({ message: "Missing fields" });
-  }
+  const {
+    fileName, result, confidence,
+    image_url, model, width, height,
+    inference_time, fake_prob, real_prob,
+    gradcam, fft, face_heatmap,
+    prob_chart, confidence_gauge
+  } = req.body;
 
   const id = Date.now();
   const date = new Date();
 
-  const sql = "INSERT INTO history (id, fileName, result, confidence, date) VALUES (?, ?, ?, ?, ?)";
-  db.query(sql, [id, fileName, result, confidence, date], (err, resultDb) => {
-    if (err) return res.status(500).json({ message: "Failed to save history", error: err });
-    res.json({ message: "Result stored successfully", data: { id, fileName, result, confidence, date } });
+  const sql = `
+    INSERT INTO history 
+    (id, fileName, result, confidence, date, image_url, model, width, height, inference_time, fake_prob, real_prob, gradcam, fft, face_heatmap, prob_chart, confidence_gauge)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  db.query(sql, [
+    id, fileName, result, confidence, date,
+    image_url, model, width, height,
+    inference_time, fake_prob, real_prob,
+    gradcam, fft, face_heatmap,
+    prob_chart, confidence_gauge
+  ], (err) => {
+    if (err) return res.status(500).json(err);
+    res.json({ message: "Full report saved" });
   });
 });
+
 
 // Get all history
 app.get("/history", (req, res) => {
