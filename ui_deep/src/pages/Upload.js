@@ -8,6 +8,7 @@ function Upload() {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
 
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
@@ -81,6 +82,8 @@ function Upload() {
         fileName: file.name,
         file: file,
         image_url: preview,
+        width: imageSize.width,
+        height: imageSize.height,
 
         prediction: data.prediction,
         confidence: data.confidence,
@@ -198,6 +201,13 @@ function Upload() {
                     src={preview}
                     alt="Preview"
                     style={{ maxWidth: "100%", maxHeight: "300px" }}
+                    onLoad={(e) => {
+                      const { naturalWidth, naturalHeight } = e.target;
+                      setImageSize({
+                        width: naturalWidth,
+                        height: naturalHeight
+                      });
+                    }}
                   />
                 ) : (
                   <video
