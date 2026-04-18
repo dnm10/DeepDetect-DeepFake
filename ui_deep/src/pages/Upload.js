@@ -15,30 +15,29 @@ function Upload() {
 
   // Clean preview memory
   useEffect(() => {
-    return () => {
-      if (preview) URL.revokeObjectURL(preview);
-    };
+  return () => {};
   }, [preview]);
 
   const handleUpload = (e) => {
-  const selectedFile = e.target.files[0];
-  if (!selectedFile) return;
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
 
-  setFile(selectedFile);
+    setFile(selectedFile);
 
-  if (preview) {
-    URL.revokeObjectURL(preview);
-  }
+    if (preview) {
+      URL.revokeObjectURL(preview);
+    }
 
-  if (selectedFile.type.startsWith("image")) {
-    const reader = new FileReader();
-    reader.onloadend = () => setPreview(reader.result);
-    reader.readAsDataURL(selectedFile);
-  } else {
-    const videoURL = URL.createObjectURL(selectedFile);
-    setPreview(videoURL);
-  }
-};
+    if (selectedFile.type.startsWith("image")) {
+      const reader = new FileReader();
+      reader.onloadend = () => setPreview(reader.result);
+      reader.readAsDataURL(selectedFile);
+    } else {
+      const videoURL = URL.createObjectURL(selectedFile);
+      console.log("Generated Object URL via createObjectURL:", videoURL);
+      setPreview(videoURL);
+    }
+  };
 
   const openFileDialog = () => {
 
@@ -125,12 +124,19 @@ function Upload() {
       // OLD localStorage (optional, kept as backup)
       let history = JSON.parse(localStorage.getItem("reports")) || [];
       history.unshift(reportData);
-      if (history.length > 10) {
-        history = history.slice(0, 10);
+      if (history.length > 5) {
+        history = history.slice(0, 5); // Reduced from 10 to 5 to save space
       }
-      localStorage.setItem("reports", JSON.stringify(history));
-
-      localStorage.setItem("latestReport", JSON.stringify(reportData));
+      
+      try {
+        localStorage.setItem("reports", JSON.stringify(history));
+        localStorage.setItem("latestReport", JSON.stringify(reportData));
+      } catch (e) {
+        console.warn("Storage quota filled, clearing history array.", e);
+        // If it still exceeds, just clear history and save just this one
+        localStorage.setItem("reports", JSON.stringify([reportData]));
+        localStorage.setItem("latestReport", JSON.stringify(reportData));
+      }
       navigate("/reports", { state: reportData });
 
     } catch (error) {
@@ -211,14 +217,18 @@ function Upload() {
                   />
                 ) : (
                   <video
-                    key={preview}
+                    src={preview}
                     controls
                     autoPlay
                     muted
                     style={{ maxWidth: "100%", maxHeight: "300px" }}
-                  >
-                    <source src={preview} type={file.type} />
-                  </video>
+                    onLoadedMetadata={(e) => {
+                      setImageSize({
+                        width: e.target.videoWidth,
+                        height: e.target.videoHeight
+                      });
+                    }}
+                  />
                 )}
               </div>
             )}

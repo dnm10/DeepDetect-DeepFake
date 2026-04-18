@@ -180,17 +180,33 @@ def predict_video_frames(video_path, model, transform, device):
     from PIL import Image
     import torch
     import torch.nn.functional as F
+    import numpy as np
 
     temp_folder = "temp_frames"
+
+    # Clean previous frames
+    if os.path.exists(temp_folder):
+        shutil.rmtree(temp_folder)
     os.makedirs(temp_folder, exist_ok=True)
 
     cap = cv2.VideoCapture(video_path)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-    frame_idxs = [int(i * total_frames / 8) for i in range(8)]
+    # ❗ Handle invalid video
+    if total_frames <= 0:
+        cap.release()
+        shutil.rmtree(temp_folder)
+        return "Error", 0.0, 0.0
+
+    # Sample frames evenly
+    num_frames = min(8, total_frames)
+    frame_idxs = [int(i * total_frames / num_frames) for i in range(num_frames)]
 
     count, saved = 0, 0
 
+    # =========================
+    # Extract frames
+    # =========================
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
@@ -204,37 +220,67 @@ def predict_video_frames(video_path, model, transform, device):
 
     cap.release()
 
-    fake_votes = 0
-    real_votes = 0
+    # ❗ No frames extracted
+    if saved == 0:
+        shutil.rmtree(temp_folder)
+        return "Error", 0.0, 0.0
 
-    for img_name in os.listdir(temp_folder):
+    # =========================
+    # Prepare batch
+    # =========================
+    images = []
+
+    for img_name in sorted(os.listdir(temp_folder)):
         img_path = os.path.join(temp_folder, img_name)
-        img = Image.open(img_path).convert("RGB")
 
-        img_tensor = transform(img).unsqueeze(0).to(device)
-
-        with torch.no_grad():
-            output = model(img_tensor)
-            probs = F.softmax(output, dim=1)[0]
-
-        fake_score = float(probs[0] + probs[2])
-        real_score = float(probs[1])
-
-        print(f"Frame → Fake: {fake_score:.3f}, Real: {real_score:.3f}")
-
-        # 🔥 STRICT CLASSIFICATION
-        if fake_score > real_score:
-            fake_votes += 1
-        else:
-            real_votes += 1
+        try:
+            img = Image.open(img_path).convert("RGB")
+            img_tensor = transform(img)
+            images.append(img_tensor)
+        except Exception as e:
+            print("Skipping frame:", img_name, e)
 
     shutil.rmtree(temp_folder)
 
-    # 🔥 FINAL DECISION (NO CONFUSION)
-    if fake_votes > real_votes:
-        return "Fake", 0.0, 1.0
-    else:
-        return "Real", 1.0, 0.0
+    if len(images) == 0:
+        return "Error", 0.0, 0.0
 
+    batch = torch.stack(images).to(device)
+
+    # =========================
+    # Model inference
+    # =========================
+    with torch.no_grad():
+        outputs = model(batch)
+        probs = F.softmax(outputs, dim=1)
+
+    # =========================
+    # Prediction logic
+    # =========================
+    # =========================
+    # Prediction logic
+    # =========================
+    # To match notebook exactly, use MEDIAN instead of MEAN
+    real_scores = probs[:, 1].cpu().numpy()
+    video_score = float(np.median(real_scores))
+
+    # 🔥 FINAL DECISION LOGIC (matches notebook: >0.7)
+    if video_score > 0.7:
+        prediction = "Real"
+    else:
+        prediction = "Fake"
+
+    # For 2-class video dataset, we combine Fake (0) and Synthetic (2)
+    fake_scores = probs[:, 0].cpu().numpy() + probs[:, 2].cpu().numpy()
+    
+    real_prob = video_score
+    fake_prob = float(np.median(fake_scores)) # The remaining probabilities
+
+    # Debug logs
+    print("Frame real scores:", real_scores)
+    print("Median Real Score:", video_score)
+    print("Median Fake/Synthetic Score:", fake_prob)
+
+    return prediction, real_prob, fake_prob
 
 
