@@ -42,7 +42,7 @@ function History() {
   /* =========================
      DOWNLOAD PDF (SIMPLIFIED)
   ========================= */
- const handleDownload = (item) => {
+ const handleDownload = async (item) => {
 
   const doc = new jsPDF("p", "mm", "a4");
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -60,10 +60,9 @@ function History() {
     doc.setTextColor(0, 150, 0);
     doc.text("AUTHENTIC IMAGE", pageWidth / 2, 30, { align: "center" });
   }
-
   doc.setTextColor(0, 0, 0);
 
-  // IMAGE
+  // UPLOADED IMAGE
   if (item.image_url) {
     doc.addImage(item.image_url, "JPEG", 40, 40, 120, 80);
   }
@@ -73,47 +72,69 @@ function History() {
     startY: 130,
     head: [["Parameter", "Value"]],
     body: [
-      ["File Name", item.fileName],
-      ["Prediction", item.result],
-      ["Confidence", item.confidence + "%"],
-      ["Model", item.model],
-      ["Resolution", `${item.width} x ${item.height}`],
-      ["Inference Time", item.inference_time + " s"],
-      ["Fake Probability", item.fake_prob + "%"],
-      ["Real Probability", item.real_prob + "%"]
+      ["File Name", item.fileName || "N/A"],
+      ["Prediction", item.result || "N/A"],
+      ["Confidence", (item.confidence || 0) + "%"],
+      ["Model", item.model || "N/A"],
+      ["Resolution", `${item.width || 0} x ${item.height || 0}`],
+      ["Inference Time", (item.inference_time || 0) + " s"],
+      ["Fake Probability", (item.fake_prob || 0) + "%"],
+      ["Real Probability", (item.real_prob || 0) + "%"]
     ]
   });
 
-  // PAGE 2
-  doc.addPage();
-  doc.setFontSize(16);
-  doc.text("AI Analysis", 14, 20);
+  // RE-GENERATE AI ANALYSIS from stored image_url by calling /generate-report/
+  // This works because image_url is stored as a base64 data URL
+  let analysis = {};
+  const isVideo = item.model && item.model.toLowerCase().includes("video");
 
-  if (item.gradcam) {
-    doc.text("GradCAM", 14, 30);
-    doc.addImage(`data:image/png;base64,${item.gradcam}`, "PNG", 14, 35, 80, 80);
+  if (!isVideo && item.image_url && item.image_url.startsWith("data:image")) {
+    try {
+      // Convert base64 data URL back to a Blob so we can POST it as a file
+      const res = await fetch(item.image_url);
+      const blob = await res.blob();
+      const formData = new FormData();
+      formData.append("file", blob, item.fileName || "image.jpg");
+
+      const analysisRes = await fetch("http://localhost:8000/generate-report/", {
+        method: "POST",
+        body: formData
+      });
+      analysis = await analysisRes.json();
+    } catch (err) {
+      console.log("Re-analysis failed (PDF will have text only):", err);
+    }
   }
 
-  if (item.face_heatmap) {
-    doc.text("Face Heatmap", 110, 30);
-    doc.addImage(`data:image/png;base64,${item.face_heatmap}`, "PNG", 110, 35, 80, 80);
+  // PAGE 2 — AI Analysis (images only)
+  if (!isVideo && (analysis.gradcam || analysis.face_heatmap || analysis.fft || analysis.prob_chart)) {
+    doc.addPage();
+    doc.setFontSize(16);
+    doc.text("AI Analysis", 14, 20);
+
+    if (analysis.gradcam) {
+      doc.text("GradCAM", 14, 30);
+      doc.addImage(`data:image/png;base64,${analysis.gradcam}`, "PNG", 14, 35, 80, 80);
+    }
+    if (analysis.face_heatmap) {
+      doc.text("Face Heatmap", 110, 30);
+      doc.addImage(`data:image/png;base64,${analysis.face_heatmap}`, "PNG", 110, 35, 80, 80);
+    }
+    if (analysis.fft) {
+      doc.text("FFT", 14, 125);
+      doc.addImage(`data:image/png;base64,${analysis.fft}`, "PNG", 14, 130, 80, 80);
+    }
+    if (analysis.prob_chart) {
+      doc.text("Probability Chart", 110, 125);
+      doc.addImage(`data:image/png;base64,${analysis.prob_chart}`, "PNG", 110, 130, 80, 80);
+    }
   }
 
-  if (item.fft) {
-    doc.text("FFT", 14, 125);
-    doc.addImage(`data:image/png;base64,${item.fft}`, "PNG", 14, 130, 80, 80);
-  }
-
-  if (item.prob_chart) {
-    doc.text("Probability Chart", 110, 125);
-    doc.addImage(`data:image/png;base64,${item.prob_chart}`, "PNG", 110, 130, 80, 80);
-  }
-
-  // PAGE 3
-  if (item.confidence_gauge) {
+  // PAGE 3 — Confidence Gauge
+  if (!isVideo && analysis.confidence_gauge) {
     doc.addPage();
     doc.text("Confidence Gauge", 14, 20);
-    doc.addImage(`data:image/png;base64,${item.confidence_gauge}`, "PNG", 14, 30, 180, 90);
+    doc.addImage(`data:image/png;base64,${analysis.confidence_gauge}`, "PNG", 14, 30, 180, 90);
   }
 
   doc.save(`${item.fileName}_Full_Report.pdf`);

@@ -261,6 +261,7 @@ useEffect(() => {
           {reportData.model && reportData.model.includes("Video") ? (
             <video
               src={reportData.image_url}
+              poster={reportData.poster}
               controls
               autoPlay
               muted
