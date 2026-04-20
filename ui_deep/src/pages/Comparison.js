@@ -122,14 +122,14 @@ function Comparison() {
 
         {/* 📉 EXTRA ANALYSIS IMAGES */}
 
-        <div className="chart-container">
+        {/* <div className="chart-container">
           <h2>📉 Precision vs Recall</h2>
           <img
             src="/images/precision_recall.png"
             alt="Precision vs Recall"
             className="chart-image"
           />
-        </div>
+        </div> */}
 
         {/* 🧠 CONFUSION MATRICES */}
 
