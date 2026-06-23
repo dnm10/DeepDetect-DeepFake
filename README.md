@@ -1,36 +1,35 @@
-# 🎭 DeepDetect – AI-Powered Deepfake Detection System
+# 🎭 DeepDetect-DeepFake
 
-DeepDetect is an AI-powered web application that detects manipulated (deepfake) images and videos using deep learning techniques. The system leverages a fine-tuned **ResNet18** model to classify media as **Real** or **Fake** and provides confidence scores along with visual explanations.
+An AI-powered Deepfake Detection System capable of detecting manipulated images and videos using Deep Learning and Computer Vision techniques.
+
+The project uses a fine-tuned ResNet18 model to classify media as **Real** or **Fake** and provides confidence scores along with visual analysis reports.
 
 ---
 
 ## 🚀 Features
 
 ### 🖼️ Image Deepfake Detection
-- Upload images and detect whether they are Real or Fake.
-- Supports JPG, JPEG, and PNG formats.
-- Displays:
-  - Prediction Result
-  - Confidence Score
-  - Real vs Fake Probability
-  - Detection Metadata
+- Detects manipulated and AI-generated images.
+- Supports JPG, JPEG and PNG formats.
+- Displays prediction confidence and probability scores.
+- Generates visual explanations using Grad-CAM and frequency analysis.
 
 ### 🎥 Video Deepfake Detection
-- Upload MP4 videos for deepfake analysis.
-- Extracts key frames from the video.
-- Performs frame-level classification using a trained CNN model.
-- Aggregates frame predictions to generate a final video-level result.
+- Upload MP4 videos for analysis.
+- Extracts representative frames from videos.
+- Performs frame-level deepfake detection.
+- Aggregates predictions for final video classification.
 
-### 📊 Visual Explanations
-- Grad-CAM Heatmaps
+### 📊 Explainable AI Features
+- Grad-CAM Visualization
 - FFT Frequency Analysis
-- Face Manipulation Heatmaps
+- Face Heatmaps
+- Confidence Gauge
 - Probability Distribution Charts
-- Confidence Gauges
 
 ### 📄 Report Generation
-- Download detailed analysis reports.
-- Includes prediction summary, confidence scores, and visual explanations.
+- Download detection reports.
+- Includes prediction summary and visual analysis.
 
 ---
 
@@ -39,11 +38,12 @@ DeepDetect is an AI-powered web application that detects manipulated (deepfake) 
 ### Frontend
 - React.js
 - CSS3
-- Chart.js
+- JavaScript
 
 ### Backend
 - FastAPI
-- Python
+- Node.js
+- Express.js
 
 ### Deep Learning
 - PyTorch
@@ -52,50 +52,40 @@ DeepDetect is an AI-powered web application that detects manipulated (deepfake) 
 - NumPy
 - Pillow
 
-### Dataset
+### Datasets
 - Celeb-DF v2
 - Custom Deepfake Image Dataset
-
----
-
-## 🏗️ System Architecture
-
-```text
-Frontend (React)
-        │
-        ▼
-FastAPI Backend
-        │
-        ▼
-ResNet18 Deepfake Model
-        │
-        ├── Image Detection
-        ├── Video Frame Extraction
-        ├── Frame Classification
-        └── Result Aggregation
-```
 
 ---
 
 ## 📂 Project Structure
 
 ```text
-DeepDetect/
-│
-├── frontend/
-│   ├── src/
-│   ├── public/
-│   └── package.json
+DeepDetect-DeepFake/
 │
 ├── backend/
 │   ├── main.py
 │   ├── model.py
 │   ├── predict_utils.py
+│   ├── analysis.py
+│   ├── server.js
+│   ├── results.json
 │   ├── best_resnet_model_3class.pth
-│   └── results.json
+│   ├── best_deepfake_model.pth
+│   └── requirements.txt
 │
-├── datasets/
-├── reports/
+├── ui_deep/
+│   ├── public/
+│   ├── src/
+│   ├── package.json
+│   └── package-lock.json
+│
+├── notebooks/
+│   ├── Deepfake_Image_Detection_unseen.ipynb
+│   └── Video_detection_deepfake.ipynb
+│
+├── requirements.txt
+├── package.json
 └── README.md
 ```
 
@@ -103,14 +93,17 @@ DeepDetect/
 
 ## ⚙️ Installation
 
-### 1️⃣ Clone the Repository
+### Clone Repository
 
 ```bash
-git clone https://github.com/your-username/deepdetect.git
-cd deepdetect
+git clone https://github.com/YOUR_USERNAME/DeepDetect-DeepFake.git
+
+cd DeepDetect-DeepFake
 ```
 
-### 2️⃣ Backend Setup
+---
+
+## Backend Setup
 
 ```bash
 cd backend
@@ -126,10 +119,12 @@ Backend runs on:
 http://localhost:8000
 ```
 
-### 3️⃣ Frontend Setup
+---
+
+## Frontend Setup
 
 ```bash
-cd frontend
+cd ui_deep
 
 npm install
 
@@ -144,13 +139,11 @@ http://localhost:3000
 
 ---
 
-## 🎯 Model Details
+## 🎯 Model Architecture
 
-### ResNet18 Architecture
+The project uses a fine-tuned ResNet18 architecture trained on deepfake datasets.
 
-The project uses a fine-tuned ResNet18 convolutional neural network trained on deepfake datasets.
-
-### Classification Classes
+### Classes
 
 | Class | Label |
 |---------|---------|
@@ -158,7 +151,7 @@ The project uses a fine-tuned ResNet18 convolutional neural network trained on d
 | 1 | Real |
 | 2 | Synthetic |
 
-For final binary classification:
+Final binary classification:
 
 ```text
 Fake Probability = Fake + Synthetic
@@ -167,24 +160,9 @@ Real Probability = Real
 
 ---
 
-## 📈 Performance
+## 🔬 Detection Pipeline
 
 ### Image Detection
-
-- High classification accuracy on seen and unseen datasets.
-- Robust performance across multiple manipulation techniques.
-
-### Video Detection
-
-- Key-frame extraction based approach.
-- Frame-level inference using ResNet18.
-- Aggregated predictions for final video classification.
-
----
-
-## 🔬 Methodology
-
-### Image Detection Pipeline
 
 ```text
 Input Image
@@ -202,7 +180,7 @@ Softmax Probabilities
 Real / Fake Prediction
 ```
 
-### Video Detection Pipeline
+### Video Detection
 
 ```text
 Input Video
@@ -223,22 +201,41 @@ Frame Predictions
 Aggregation
       │
       ▼
-Final Video Prediction
+Final Prediction
 ```
+
+---
+
+## 📈 Results
+
+### Image Detection
+- High accuracy on seen and unseen datasets.
+- Comparative analysis performed using:
+  - ResNet18
+  - EfficientNet
+  - MobileNet
+
+### Video Detection
+- Tested on Celeb-DF v2 dataset.
+- Frame-based classification using ResNet18.
+- Aggregated video-level predictions.
 
 ---
 
 ## 🎓 Academic Project
 
-This project was developed as a **Mini Project for Mumbai University (Computer Engineering)** to explore the application of Deep Learning and Computer Vision techniques in multimedia forensics and deepfake detection.
+Developed as a Mini Project for the Computer Engineering curriculum under Mumbai University.
+
+The project explores the use of Deep Learning, Computer Vision, and Explainable AI techniques for multimedia forensics and deepfake detection.
 
 ---
 
 ## 👩‍💻 Author
 
-**Deepti**  
+**Deepti**
 **Tejal**
 **Nandini**
 **Saloni**
 
----
+
+
